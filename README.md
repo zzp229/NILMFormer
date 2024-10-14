@@ -1,10 +1,10 @@
 <h1 align="center">NILMFormer</h1>
 
+<h2 align="center">A Sequence-To-Sequence Non-Stationarity Aware Transformer for Non-Intrusive Load Monitoring</h2>
+
 <p align="center">
     <img width="450" src="https://github.com/adrienpetralia/NILMFormer/blob/main/Ressources/Intro.png" alt="Intro image">
 </p>
-
-<h2 align="center">A Sequence-To-Sequence Non-Stationarity Aware Transformer for Non-Intrusive Load Monitoring</h2>
 
 Official repository of NILMFormer, a sequence-to-sequence Transformer-based deep learning architecture designed to address the non-stationary nature of real-world smart meter.
 
