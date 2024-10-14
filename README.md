@@ -7,7 +7,7 @@
 <h2 align="center">A Sequence-To-Sequence Non-Stationarity Aware Transformer for Non-Intrusive Load Monitoring</h2>
 
 Official repository of NILMFormer, a sequence-to-sequence Transformer-based deep learning architecture designed to address the non-stationary nature of real-world smart meter.
-    We introduce NILMFormer, 
+
 
 ## Proposed Approach
 ...
