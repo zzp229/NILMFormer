@@ -1,3 +1,11 @@
+#################################################################################################################
+#
+# @copyright : ©2025 EDF
+# @author : Adrien Petralia
+# @description : NILMFormer - TSILNet baseline
+#
+#################################################################################################################
+
 import torch
 import torch.nn as nn
 from torch.nn.utils import weight_norm

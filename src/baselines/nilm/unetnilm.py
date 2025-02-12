@@ -1,3 +1,11 @@
+#################################################################################################################
+#
+# @copyright : ©2025 EDF
+# @author : Adrien Petralia
+# @description : Unet-NILM baseline - Adapted from https://github.com/sambaiga/UNETNiLM
+#
+#################################################################################################################
+
 import torch
 import torch.nn.functional as F
 

@@ -2,7 +2,7 @@
 #
 # @copyright : ©2025 EDF
 # @author : Adrien Petralia
-# @description : BERT4NILM - code taken from  https://github.com/Yueeeeeeee/BERT4NILM
+# @description : BERT4NILM baseline - code taken from  https://github.com/Yueeeeeeee/BERT4NILM
 #
 #################################################################################################################
 

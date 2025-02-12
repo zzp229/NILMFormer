@@ -1,3 +1,11 @@
+#################################################################################################################
+#
+# @copyright : ©2025 EDF
+# @author : Adrien Petralia
+# @description : Mixture of Expert Layers
+#
+#################################################################################################################
+
 from typing import Any, TypeVar, Iterator, Iterable, Generic
 
 import torch.nn

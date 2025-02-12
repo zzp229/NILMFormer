@@ -1,4 +1,11 @@
-# DiffNILM implmentation, no publicy code available
+#################################################################################################################
+#
+# @copyright : ©2025 EDF
+# @author : Adrien Petralia
+# @description : DiffNILM baseline
+#
+#################################################################################################################
+
 # Codes are mainly taken and adapted from:
 # https://github.com/maum-ai/nuwave
 # https://github.com/lmnt-com/diffwave

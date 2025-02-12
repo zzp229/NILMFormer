@@ -1,3 +1,11 @@
+#################################################################################################################
+#
+# @copyright : ©2025 EDF
+# @author : Adrien Petralia
+# @description : CNN1D baseline - Adapted from https://github.com/sambaiga/UNETNiLM
+#
+#################################################################################################################
+
 import torch
 from torch import nn
 
