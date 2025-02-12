@@ -1,21 +1,23 @@
 import torch
 from torch import nn
 
+
 class CNN1D(nn.Module):
     """
     Baseline 1D CNN implementation
     """
 
-    def __init__(self, 
-                 window_size=128, 
-                 quantiles=[0.5], # [0.0025,0.1, 0.5, 0.9, 0.975]
-                 c_in=1, 
-                 num_classes=1, 
-                 dropout=0.1, 
-                 pooling_size=16,
-                 return_values='power',
-                 verbose_loss=False
-                ):
+    def __init__(
+        self,
+        window_size=128,
+        quantiles=[0.5],  # [0.0025,0.1, 0.5, 0.9, 0.975]
+        c_in=1,
+        num_classes=1,
+        dropout=0.1,
+        pooling_size=16,
+        return_values="power",
+        verbose_loss=False,
+    ):
         """
         CNN1D-NILM Pytorch implementation as described in the original paper "Multi-label learning for appliance recognition in NILM using Fryze-current decomposition and convolutional neural network".
 
@@ -28,7 +30,7 @@ class CNN1D(nn.Module):
             dropout (float) : Dropout probability
             num_classes (int) : number of output classes / appliances
             pooling_size (int) : size of global average pooling filter
-            return_values (str) : 'power', 'states' or 'both' -> return if tuple 
+            return_values (str) : 'power', 'states' or 'both' -> return if tuple
             verbose loss
         Returns:
             model (CNN1D) : CNN1D model object
@@ -61,7 +63,9 @@ class CNN1D(nn.Module):
         self.mlp1 = nn.Linear(128 * 16, 1024)
         self.prelu4 = nn.PReLU()
         self.mlp2 = nn.Linear(1024, self.num_classes * self.window_size)
-        self.mlp3 = nn.Linear(1024, self.num_classes * self.window_size * self.num_quantiles)
+        self.mlp3 = nn.Linear(
+            1024, self.num_classes * self.window_size * self.num_quantiles
+        )
 
         nn.utils.weight_norm(self.conv1)
         nn.init.xavier_uniform_(self.conv1.weight)
@@ -82,7 +86,6 @@ class CNN1D(nn.Module):
         self.mlp3.bias.data.fill_(0)
 
     def forward(self, x):
-
         x = self.prelu1(self.bn1(self.conv1(x)))
         x = self.prelu2(self.bn2(self.conv2(x)))
         x = self.prelu3(self.bn3(self.conv3(x)))
@@ -91,23 +94,30 @@ class CNN1D(nn.Module):
         x = self.adapool(x).reshape(x.size(0), -1)
         x = self.dropout(self.prelu4(self.mlp1(x)))
 
-        states_logits = self.mlp2(x).reshape(x.size(0), self.window_size, self.num_classes).permute(0, 2, 1)
-        power_logits = self.mlp3(x).reshape(x.size(0), self.window_size, self.num_quantiles, self.num_classes).permute(0, 3, 2, 1)
+        states_logits = (
+            self.mlp2(x)
+            .reshape(x.size(0), self.window_size, self.num_classes)
+            .permute(0, 2, 1)
+        )
+        power_logits = (
+            self.mlp3(x)
+            .reshape(x.size(0), self.window_size, self.num_quantiles, self.num_classes)
+            .permute(0, 3, 2, 1)
+        )
 
         if self.num_quantiles > 1:
-            power_logits = power_logits[:, :, self.num_quantiles//2, :]
+            power_logits = power_logits[:, :, self.num_quantiles // 2, :]
         else:
             power_logits = torch.squeeze(power_logits, dim=2)
-            
-        if self.return_values=='power':
+
+        if self.return_values == "power":
             return power_logits
-        elif self.return_values=='states':
+        elif self.return_values == "states":
             return states_logits
         else:
             return power_logits, states_logits
-    
+
     def forward_loss(self, x, y_power, y_status):
-        
         x = self.prelu1(self.bn1(self.conv1(x)))
         x = self.prelu2(self.bn2(self.conv2(x)))
         x = self.prelu3(self.bn3(self.conv3(x)))
@@ -116,14 +126,24 @@ class CNN1D(nn.Module):
         x = self.adapool(x).reshape(x.size(0), -1)
         x = self.dropout(self.prelu4(self.mlp1(x)))
 
-        states_logits = self.mlp2(x).reshape(x.size(0), self.window_size, self.num_classes).permute(0, 2, 1)
-        power_logits = self.mlp3(x).reshape(x.size(0), self.window_size, self.num_quantiles, self.num_classes).permute(0, 3, 2, 1)
-        
-        q_loss = self.quantile_regression_loss(power_logits.permute(0, 3, 2, 1), y_power.permute(0, 2, 1))
+        states_logits = (
+            self.mlp2(x)
+            .reshape(x.size(0), self.window_size, self.num_classes)
+            .permute(0, 2, 1)
+        )
+        power_logits = (
+            self.mlp3(x)
+            .reshape(x.size(0), self.window_size, self.num_quantiles, self.num_classes)
+            .permute(0, 3, 2, 1)
+        )
+
+        q_loss = self.quantile_regression_loss(
+            power_logits.permute(0, 3, 2, 1), y_power.permute(0, 2, 1)
+        )
         bce_loss = nn.BCEWithLogitsLoss()(states_logits, y_status)
-        
+
         return q_loss + bce_loss, q_loss, bce_loss
-    
+
     def quantile_regression_loss(self, inputs, targets):
         """
         Function that computes the quantile regression loss
@@ -137,26 +157,25 @@ class CNN1D(nn.Module):
         targets = targets.unsqueeze(2).expand_as(inputs)
         quantiles = self.quantiles.to(targets.device)
         error = (targets - inputs).permute(0, 1, 3, 2)
-        loss = torch.max(quantiles*error, (quantiles-1)*error)
-        
+        loss = torch.max(quantiles * error, (quantiles - 1) * error)
+
         return loss.mean()
-        
-    def train_one_epoch(self, loader, optimizer, device='cuda'):
+
+    def train_one_epoch(self, loader, optimizer, device="cuda"):
         """
         Train for one epoch
         """
         self.train()
-        
+
         total_q_loss = 0
         total_bce_loss = 0
         total_loss = 0
-        
+
         for seqs, labels_energy, status in loader:
-            
             seqs = torch.Tensor(seqs.float()).to(device)
             labels_energy = torch.Tensor(labels_energy.float()).to(device)
             status = torch.Tensor(status.float()).to(device)
-            
+
             optimizer.zero_grad()
             loss, q_loss, bce_loss = self.forward_loss(seqs, labels_energy, status)
             total_q_loss += q_loss.item()
@@ -164,15 +183,22 @@ class CNN1D(nn.Module):
             total_loss += loss.item()
             loss.backward()
             optimizer.step()
-                
+
         total_loss = total_loss / len(loader)
-        
+
         if self.verbose_loss:
-            print('Tot. loss:', total_loss, ' | Quantiles loss:', total_q_loss / len(loader), ' | BCE loss:', total_bce_loss / len(loader))
+            print(
+                "Tot. loss:",
+                total_loss,
+                " | Quantiles loss:",
+                total_q_loss / len(loader),
+                " | BCE loss:",
+                total_bce_loss / len(loader),
+            )
 
         return total_loss
-    
-    def valid_one_epoch(self, loader, device='cuda'):
+
+    def valid_one_epoch(self, loader, device="cuda"):
         """
         Train for one epoch
         """
@@ -181,21 +207,27 @@ class CNN1D(nn.Module):
         total_q_loss = 0
         total_bce_loss = 0
         total_loss = 0
-        
+
         for seqs, labels_energy, status in loader:
-            
             seqs = torch.Tensor(seqs.float()).to(device)
             labels_energy = torch.Tensor(labels_energy.float()).to(device)
             status = torch.Tensor(status.float()).to(device)
-            
+
             loss, q_loss, bce_loss = self.forward_loss(seqs, labels_energy, status)
             total_q_loss += q_loss.item()
             total_bce_loss += bce_loss.item()
             total_loss += loss.item()
-                
+
         total_loss = total_loss / len(loader)
 
         if self.verbose_loss:
-            print('Tot. loss:', total_loss, ' | Quantiles loss:', total_q_loss / len(loader), ' | BCE loss:', total_bce_loss / len(loader))
+            print(
+                "Tot. loss:",
+                total_loss,
+                " | Quantiles loss:",
+                total_q_loss / len(loader),
+                " | BCE loss:",
+                total_bce_loss / len(loader),
+            )
 
         return total_loss

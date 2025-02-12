@@ -1,26 +1,30 @@
 import torch
 import torch.nn.functional as F
+
 from torch import nn
+
 
 class Encoder(nn.Module):
     """
     Taken from https://github.com/sambaiga/UNETNiLM/blob/master/src/net/layers.py
     """
 
-    def __init__(self,
-                 n_channels=10,
-                 n_kernels=16,
-                 n_layers=3,
-                 seq_size=50):
+    def __init__(self, n_channels=10, n_kernels=16, n_layers=3, seq_size=50):
         super(Encoder, self).__init__()
-        self.feat_size = (seq_size - 1) // 2 ** n_layers + 1
+        self.feat_size = (seq_size - 1) // 2**n_layers + 1
         self.feat_dim = self.feat_size * n_kernels
         self.conv_stack = nn.Sequential(
-            *([Conv1D(n_channels, n_kernels // 2 ** (n_layers - 1))] +
-              [Conv1D(n_kernels // 2 ** (n_layers - l),
-                      n_kernels // 2 ** (n_layers - l - 1))
-               for l in range(1, n_layers - 1)] +
-              [Conv1D(n_kernels // 2, n_kernels, last=True)])
+            *(
+                [Conv1D(n_channels, n_kernels // 2 ** (n_layers - 1))]
+                + [
+                    Conv1D(
+                        n_kernels // 2 ** (n_layers - l),
+                        n_kernels // 2 ** (n_layers - l - 1),
+                    )
+                    for l in range(1, n_layers - 1)
+                ]
+                + [Conv1D(n_kernels // 2, n_kernels, last=True)]
+            )
         )
 
     def forward(self, x):
@@ -31,28 +35,25 @@ class Encoder(nn.Module):
 
 class Deconv1D(nn.Module):
     """
-     Taken from https://github.com/sambaiga/UNETNiLM/blob/master/src/net/unet.py
+    Taken from https://github.com/sambaiga/UNETNiLM/blob/master/src/net/unet.py
     """
 
-    def __init__(self,
-                 n_channels,
-                 n_kernels,
-                 kernel_size=3,
-                 stride=2,
-                 padding=1,
-                 last=False,
-                 activation=nn.PReLU()):
+    def __init__(
+        self,
+        n_channels,
+        n_kernels,
+        kernel_size=3,
+        stride=2,
+        padding=1,
+        last=False,
+        activation=nn.PReLU(),
+    ):
         super(Deconv1D, self).__init__()
         self.deconv = nn.ConvTranspose1d(
-            n_channels, n_kernels,
-            kernel_size, stride, padding
+            n_channels, n_kernels, kernel_size, stride, padding
         )
         if not last:
-            self.net = nn.Sequential(
-                self.deconv,
-                nn.BatchNorm1d(n_kernels),
-                activation
-            )
+            self.net = nn.Sequential(self.deconv, nn.BatchNorm1d(n_kernels), activation)
         else:
             self.net = self.deconv
         nn.init.xavier_uniform_(self.deconv.weight)
@@ -66,24 +67,20 @@ class Conv1D(nn.Module):
     Taken from https://github.com/sambaiga/UNETNiLM/blob/master/src/net/unet.py
     """
 
-    def __init__(self,
-                 n_channels,
-                 n_kernels,
-                 kernel_size=3,
-                 stride=2,
-                 padding=1,
-                 last=False,
-                 activation=nn.PReLU()):
+    def __init__(
+        self,
+        n_channels,
+        n_kernels,
+        kernel_size=3,
+        stride=2,
+        padding=1,
+        last=False,
+        activation=nn.PReLU(),
+    ):
         super(Conv1D, self).__init__()
-        self.conv = nn.Conv1d(
-            n_channels, n_kernels,
-            kernel_size, stride, padding
-        )
+        self.conv = nn.Conv1d(n_channels, n_kernels, kernel_size, stride, padding)
         if not last:
-            self.net = nn.Sequential(
-                self.conv,
-                nn.BatchNorm1d(n_kernels),
-                activation)
+            self.net = nn.Sequential(self.conv, nn.BatchNorm1d(n_kernels), activation)
         else:
             self.net = self.conv
         nn.utils.weight_norm(self.conv)
@@ -118,15 +115,17 @@ class UNetCNN1D(nn.Module):
     """
 
     def __init__(
-            self,
-            num_layers: int = 5,
-            features_start: int = 8,
-            n_channels: int = 1,
-            num_classes=5
+        self,
+        num_layers: int = 5,
+        features_start: int = 8,
+        n_channels: int = 1,
+        num_classes=5,
     ):
         super().__init__()
         self.num_layers = num_layers
-        layers = [Conv1D(n_channels, features_start, kernel_size=1, stride=1, padding=0)]
+        layers = [
+            Conv1D(n_channels, features_start, kernel_size=1, stride=1, padding=0)
+        ]
         feats = features_start
         for i in range(num_layers - 1):
             layers.append(Conv1D(feats, feats * 2))
@@ -143,13 +142,13 @@ class UNetCNN1D(nn.Module):
         self.layers = nn.ModuleList(layers)
 
     def forward(self, x):
-        #x = x.unsqueeze(-1).permute(0, 2, 1)
+        # x = x.unsqueeze(-1).permute(0, 2, 1)
         xi = [self.layers[0](x)]
 
-        for layer in self.layers[1:self.num_layers]:
+        for layer in self.layers[1 : self.num_layers]:
             xi.append(layer(xi[-1]))
 
-        for i, layer in enumerate(self.layers[self.num_layers:-1]):
+        for i, layer in enumerate(self.layers[self.num_layers : -1]):
             xi[-1] = layer(xi[-1], xi[-2 - i])
 
         out = self.layers[-1](xi[-1])
@@ -158,20 +157,20 @@ class UNetCNN1D(nn.Module):
 
 class UNetNiLM(nn.Module):
     def __init__(
-            self,
-            num_layers=4,
-            features_start=8,
-            c_in=1,
-            num_classes=1,
-            pooling_size=16,
-            window_size=128,
-            quantiles=[0.5], # [0.0025,0.1, 0.5, 0.9, 0.975]
-            d_model=128,
-            dropout=0.1,
-            return_values="power",
-            verbose_loss=False
+        self,
+        num_layers=4,
+        features_start=8,
+        c_in=1,
+        num_classes=1,
+        pooling_size=16,
+        window_size=128,
+        quantiles=[0.5],  # [0.0025,0.1, 0.5, 0.9, 0.975]
+        d_model=128,
+        dropout=0.1,
+        return_values="power",
+        verbose_loss=False,
     ):
-        """ 
+        """
         UNet-NILM Pytorch implementation as described in the original paper "UNet-NILM: A Deep Neural Network for Multi-tasks Appliances state detection and power estimation in NILM".
 
         Code adapted from: https://github.com/sambaiga/UNETNiLM
@@ -199,7 +198,7 @@ class UNetNiLM(nn.Module):
         self.quantiles = torch.Tensor(quantiles)
         self.window_size = window_size
         self.verbose_loss = verbose_loss
-        
+
         self.unet_block = UNetCNN1D(num_layers, features_start, c_in, num_classes)
         self.encoder = Encoder(features_start, d_model, num_layers // 2, window_size)
         self.mlp = nn.Linear(d_model * pooling_size, 1024)
@@ -207,7 +206,9 @@ class UNetNiLM(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         self.fc_out_state = nn.Linear(1024, num_classes * window_size)
-        self.fc_out_power = nn.Linear(1024, num_classes * window_size * self.num_quantiles)
+        self.fc_out_power = nn.Linear(
+            1024, num_classes * window_size * self.num_quantiles
+        )
 
         nn.utils.weight_norm(self.mlp)
         nn.init.xavier_normal_(self.mlp.weight)
@@ -227,38 +228,55 @@ class UNetNiLM(nn.Module):
         conv_out = self.dropout(self.encoder(unet_out))
         conv_out = F.adaptive_avg_pool1d(conv_out, self.pooling_size).view(B, -1)
         mlp_out = self.dropout(self.mlp(conv_out))
-        
-        states_logits = self.fc_out_state(mlp_out).view(B, self.window_size, self.num_classes).permute(0, 2, 1) # Return: Batch, Num_classes, Win_size
-        power_logits = self.fc_out_power(mlp_out).view(B, self.window_size, self.num_quantiles, self.num_classes).permute(0, 3, 2, 1) # Return: Batch, Num_classes, N_Quantiles, Win_size 
-        
+
+        states_logits = (
+            self.fc_out_state(mlp_out)
+            .view(B, self.window_size, self.num_classes)
+            .permute(0, 2, 1)
+        )  # Return: Batch, Num_classes, Win_size
+        power_logits = (
+            self.fc_out_power(mlp_out)
+            .view(B, self.window_size, self.num_quantiles, self.num_classes)
+            .permute(0, 3, 2, 1)
+        )  # Return: Batch, Num_classes, N_Quantiles, Win_size
+
         if self.num_quantiles > 1:
-            power_logits = power_logits[:, :, self.num_quantiles//2, :]
+            power_logits = power_logits[:, :, self.num_quantiles // 2, :]
         else:
             power_logits = torch.squeeze(power_logits, dim=2)
-            
-        if self.return_values=='power':
+
+        if self.return_values == "power":
             return power_logits
-        elif self.return_values=='states':
+        elif self.return_values == "states":
             return states_logits
         else:
             return power_logits, states_logits
-    
+
     def forward_loss(self, x, y_power, y_status):
-        
         B = x.shape[0]
         unet_out = self.dropout(self.unet_block(x))
         conv_out = self.dropout(self.encoder(unet_out))
         conv_out = F.adaptive_avg_pool1d(conv_out, self.pooling_size).view(B, -1)
         mlp_out = self.dropout(self.mlp(conv_out))
-        
-        states_logits = self.fc_out_state(mlp_out).view(B, self.window_size, self.num_classes).permute(0, 2, 1) # Return: Batch, Num_classes, Win_size
-        power_logits = self.fc_out_power(mlp_out).view(B, self.window_size, self.num_quantiles, self.num_classes).permute(0, 3, 2, 1) # Return: Batch, Num_classes, N_Quantiles, Win_size 
-        
-        q_loss = self.quantile_regression_loss(power_logits.permute(0, 3, 2, 1), y_power.permute(0, 2, 1))
+
+        states_logits = (
+            self.fc_out_state(mlp_out)
+            .view(B, self.window_size, self.num_classes)
+            .permute(0, 2, 1)
+        )  # Return: Batch, Num_classes, Win_size
+        power_logits = (
+            self.fc_out_power(mlp_out)
+            .view(B, self.window_size, self.num_quantiles, self.num_classes)
+            .permute(0, 3, 2, 1)
+        )  # Return: Batch, Num_classes, N_Quantiles, Win_size
+
+        q_loss = self.quantile_regression_loss(
+            power_logits.permute(0, 3, 2, 1), y_power.permute(0, 2, 1)
+        )
         bce_loss = nn.BCEWithLogitsLoss()(states_logits, y_status)
-        
+
         return q_loss + bce_loss, q_loss, bce_loss
-    
+
     def quantile_regression_loss(self, inputs, targets):
         """
         Function that computes the quantile regression loss
@@ -272,26 +290,25 @@ class UNetNiLM(nn.Module):
         targets = targets.unsqueeze(2).expand_as(inputs)
         quantiles = self.quantiles.to(targets.device)
         error = (targets - inputs).permute(0, 1, 3, 2)
-        loss = torch.max(quantiles*error, (quantiles-1)*error)
-        
+        loss = torch.max(quantiles * error, (quantiles - 1) * error)
+
         return loss.mean()
-        
-    def train_one_epoch(self, loader, optimizer, device='cuda'):
+
+    def train_one_epoch(self, loader, optimizer, device="cuda"):
         """
         Train for one epoch
         """
         self.train()
-        
+
         total_q_loss = 0
         total_bce_loss = 0
         total_loss = 0
-        
+
         for seqs, labels_energy, status in loader:
-            
             seqs = torch.Tensor(seqs.float()).to(device)
             labels_energy = torch.Tensor(labels_energy.float()).to(device)
             status = torch.Tensor(status.float()).to(device)
-            
+
             optimizer.zero_grad()
             loss, q_loss, bce_loss = self.forward_loss(seqs, labels_energy, status)
             total_q_loss += q_loss.item()
@@ -299,35 +316,41 @@ class UNetNiLM(nn.Module):
             total_loss += loss.item()
             loss.backward()
             optimizer.step()
-                
+
         total_loss = total_loss / len(loader)
-        
+
         if self.verbose_loss:
-            print('Tot. loss:', total_loss, ' | Quantiles loss:', total_q_loss / len(loader), ' | BCE loss:', total_bce_loss / len(loader))
+            print(
+                "Tot. loss:",
+                total_loss,
+                " | Quantiles loss:",
+                total_q_loss / len(loader),
+                " | BCE loss:",
+                total_bce_loss / len(loader),
+            )
 
         return total_loss
-    
-    def valid_one_epoch(self, loader, device='cuda'):
+
+    def valid_one_epoch(self, loader, device="cuda"):
         """
         Train for one epoch
         """
         self.eval()
-        
+
         total_loss = 0
         total_q_loss = 0
         total_bce_loss = 0
-        
+
         for seqs, labels_energy, status in loader:
-            
             seqs = torch.Tensor(seqs.float()).to(device)
             labels_energy = torch.Tensor(labels_energy.float()).to(device)
             status = torch.Tensor(status.float()).to(device)
-            
+
             loss, q_loss, bce_loss = self.forward_loss(seqs, labels_energy, status)
             total_q_loss += q_loss.item()
             total_bce_loss += bce_loss.item()
             total_loss += loss.item()
-                
+
         total_loss = total_loss / len(loader)
 
         return total_loss

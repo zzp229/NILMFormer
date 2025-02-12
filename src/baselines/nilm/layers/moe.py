@@ -9,7 +9,7 @@ class Module(torch.nn.Module):
     r"""
     Wraps ``torch.nn.Module`` to overload ``__call__`` instead of
     ``forward`` for better type checking.
-    
+
     `PyTorch Github issue for clarification <https://github.com/pytorch/pytorch/issues/44605>`_
     """
 
@@ -18,11 +18,11 @@ class Module(torch.nn.Module):
         pass
 
     def __init_subclass__(cls, **kwargs):
-        if cls.__dict__.get('__call__', None) is None:
+        if cls.__dict__.get("__call__", None) is None:
             return
 
-        setattr(cls, 'forward', cls.__dict__['__call__'])
-        delattr(cls, '__call__')
+        setattr(cls, "forward", cls.__dict__["__call__"])
+        delattr(cls, "__call__")
 
     @property
     def device(self):
@@ -31,12 +31,13 @@ class Module(torch.nn.Module):
             sample_param = next(params)
             return sample_param.device
         except StopIteration:
-            raise RuntimeError(f"Unable to determine"
-                               f" device of {self.__class__.__name__}") from None
+            raise RuntimeError(
+                f"Unable to determine device of {self.__class__.__name__}"
+            ) from None
 
 
-M = TypeVar('M', bound=torch.nn.Module)
-T = TypeVar('T')
+M = TypeVar("M", bound=torch.nn.Module)
+T = TypeVar("T")
 
 
 class TypedModuleList(torch.nn.ModuleList, Generic[M]):
@@ -63,7 +64,7 @@ class TypedModuleList(torch.nn.ModuleList, Generic[M]):
 
     def forward(self):
         raise NotImplementedError()
-    
+
 
 def clone_module_list(module: M, n: int) -> TypedModuleList[M]:
     """
@@ -72,20 +73,24 @@ def clone_module_list(module: M, n: int) -> TypedModuleList[M]:
     Make a `nn.ModuleList` with clones of a given module
     """
     return TypedModuleList([copy.deepcopy(module) for _ in range(n)])
-    
+
 
 class FeedForward(Module):
     """
     ## FFN module
     """
 
-    def __init__(self, d_model: int, d_ff: int,
-                 dropout: float = 0.1,
-                 activation=nn.ReLU(),
-                 is_gated: bool = False,
-                 bias1: bool = True,
-                 bias2: bool = True,
-                 bias_gate: bool = True):
+    def __init__(
+        self,
+        d_model: int,
+        d_ff: int,
+        dropout: float = 0.1,
+        activation=nn.ReLU(),
+        is_gated: bool = False,
+        bias1: bool = True,
+        bias2: bool = True,
+        bias_gate: bool = True,
+    ):
         """
         * `d_model` is the number of features in a token embedding
         * `d_ff` is the number of features in the hidden layer of the FFN
@@ -125,19 +130,22 @@ class FeedForward(Module):
         # $(f(x W_1 + b_1) \otimes (x V + b)) W_2 + b_2$ or $f(x W_1 + b_1) W_2 + b_2$
         # depending on whether it is gated
         return self.layer2(x)
-    
+
+
 class SwitchFeedForward(Module):
     """
     ## Routing among multiple FFNs
     """
 
-    def __init__(self,
-                 d_model,
-                 expert,
-                 capacity_factor=1.2,
-                 drop_tokens=False,
-                 is_scale_prob=False,
-                 n_experts=4):
+    def __init__(
+        self,
+        d_model,
+        expert,
+        capacity_factor=1.2,
+        drop_tokens=False,
+        is_scale_prob=False,
+        n_experts=4,
+    ):
         """
         * `capacity_factor` is the capacity of each expert as a factor relative to ideally balanced load
         * `drop_tokens` specifies whether to drop tokens if more tokens are routed to an expert than the capacity
@@ -182,7 +190,9 @@ class SwitchFeedForward(Module):
         route_prob_max, routes = torch.max(route_prob, dim=-1)
 
         # Get indexes of tokens going to each expert
-        indexes_list = [torch.eq(routes, i).nonzero(as_tuple=True)[0] for i in range(self.n_experts)]
+        indexes_list = [
+            torch.eq(routes, i).nonzero(as_tuple=True)[0] for i in range(self.n_experts)
+        ]
 
         # Initialize an empty tensor to store outputs
         final_output = x.new_zeros(x.shape)
@@ -212,7 +222,9 @@ class SwitchFeedForward(Module):
                 indexes_list[i] = indexes_list[i][:capacity]
 
         # Get outputs of the expert FFNs
-        expert_output = [self.experts[i](x[indexes_list[i], :]) for i in range(self.n_experts)]
+        expert_output = [
+            self.experts[i](x[indexes_list[i], :]) for i in range(self.n_experts)
+        ]
 
         # Assign to final output
         for i in range(self.n_experts):
@@ -229,7 +241,9 @@ class SwitchFeedForward(Module):
         else:
             # Don't scale the values but multiply by $\frac{p}{\hat{p}} = 1$ so that the gradients flow
             # (this is something we experimented with).
-            final_output = final_output * (route_prob_max / route_prob_max.detach()).view(-1, 1)
+            final_output = final_output * (
+                route_prob_max / route_prob_max.detach()
+            ).view(-1, 1)
 
         # Change the shape of the final output back to `[seq_len, batch_size, d_model]`
         final_output = final_output.view(seq_len, batch_size, d_model)
