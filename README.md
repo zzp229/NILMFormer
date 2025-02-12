@@ -56,7 +56,7 @@ To run all experiments conducted in our paper (this may take some time), use:
 **TL;DR** : **NILMFormer** is a **sequence-to-sequence Transformer-based architecture** purpose-built for **Non-Intrusive Load Monitoring (NILM)**. It tackles the **non-stationary** nature of smart meter data by splitting and separately encoding the **shape**, **temporal** dynamics, and **intrinsic statistics** of each subsequence. These components are then fused within the Transformer block. Finally, the prediction is refined through a **linear transformation** of the input series statistics, accounting for **power loss** in the disaggregation process.
 
 <p align="center">
-    <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/results_sample.png" alt="Results Sample">
+    <img width="500" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/results_sample.png" alt="Results Sample">
 </p>
 
 
