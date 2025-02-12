@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# import xformers.ops as xops
+import xformers.ops as xops
 
 from src.nilmformer.congif import NILMFormerConfig
 
@@ -64,8 +64,7 @@ class DiagonnalyMaskedSelfAttention(nn.Module):
         diag_mask = DiagonalMaskFromSeqlen(batch, seqlen, device=xq.device)
 
         if self.use_efficient_attention:
-            pass
-            # output = xops.memory_efficient_attention(xq, xk, xv, attn_bias=diag_mask.mask, p=self.dropout)
+            output = xops.memory_efficient_attention(xq, xk, xv, attn_bias=diag_mask.mask, p=self.dropout)
         else:
             scale = 1.0 / xq.shape[-1] ** 0.5
             scores = torch.einsum("blhe,bshe->bhls", xq, xk)
