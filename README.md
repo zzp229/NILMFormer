@@ -1,7 +1,7 @@
 <h1 align="center">NILMFormer</h1>
 
 <p align="center">
-    <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/Intro.png" alt="Intro image">
+    <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/intro.png" alt="Intro image">
 </p>
 
 <h2 align="center">A Sequence-To-Sequence Non-Stationarity Aware Transformer for Non-Intrusive Load Monitoring</h2>
@@ -57,6 +57,11 @@ To run all experiments conducted in our paper (this may take some time), use:
 
 
 ### Architecture Details
+
+<p align="center">
+    <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/nilmformer.png" alt="NILMFormer Architecture">
+</p>
+
 To handle the non-stationarity aspect of electricity consumption data, NILMFormer operates by first stationnarizing the input subsequence by subtracting its mean and standard deviation.
 While the normalized subsequence is passed through a robust convolutional block that serves as a features extractor, the removed statistics are linearly projected in a higher space (referred to as *TokenStats*), and the timestamps are used by the proposed TimeRPE module to compute a positional encoding matrix.
 These features are concatenated and fed into the Transformer block, followed by a simple Head to obtain a 1D sequence of values.
