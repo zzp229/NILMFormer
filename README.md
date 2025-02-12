@@ -73,36 +73,19 @@ The final step consists of linearly projecting back the *TokenStats* (referred t
 
 #### TimeRPE
 
-The Transformer architecture does not inherently understand sequence order due to its self-attention mechanisms, which are permutation invariant. 
-Therefore, Positional Encoding (PE) is mandatory to provide this context, allowing the model to consider the position of each token in a sequence. 
-Fixed sinusoidal or fully learnable PEs are commonly used in most current Transformer-based architectures for time series analysis (PatchTST), including those proposed for energy disaggregation (BERT4NILM, Energformer, STNILM). 
-This kind of PE consists of adding a matrix of fixed or learnable weight on the extracted features before the Transformer block.
-However, these PEs only help the model understand local context information (i.e., the given order of the tokens in the sequence) and do not provide any information about the global context when operating on subsequences of a longer series. 
-In the context of NILM, appliance use is often related to specific periods (e.g., dishwashers running after mealtimes, electric vehicles charging at night, or on weekends). 
-Moreover, detailed timestamp information is always available in real-world NILM applications.
-Thus, using a PE based on timestamp information can help the model better understand the recurrent use of appliances. 
-Timestamp-based PEs have been briefly investigated for time series forecasting but were always combined with a fixed or learnable PE and directly added to the extracted features.
-
 <p align="center">
     <img width="250" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/timerpe.png" alt="TimeRPE module">
 </p>
 
-
-Therefore, we proposed the Timestamps Related Positional Encoding (TimeRPE), a Positional Encoding based only on the discrete timestamp values extracted from the input subsequences.
-The TimeRPE module, depicted in Figure~\ref{fig:nilmformerparts} (c), takes as input the timestamps information $t$ from the input subsequences, decomposes it such as minutes $t^m$, hours $t^h$, days $t^d$, and months $t^M$, and project them in a sinusoidal basis, as:
-
-```math
-    T_{\sin}(t_i) = \sin \left(\frac{2 \pi t^j_i}{p^j} \right) \quad \text{and} \quad
-    T_{\cos}(t_i) = \cos \left(\frac{2 \pi t^j_i}{p^j} \right)$,
-```
-with $j \in \{m, h, d, M\}$ and $\{p^m=59, p^h=23, p^d=6, p^M=11\}$ corresponding to the set of max possible discrete timestamp variable.
-Afterward, the obtained representation is projected in a higher dimensional space using a 1D convolution layer with a kernel of size 1.
+**Timestamps-Related Positional Encoding (TimeRPE)** leverages discrete timestamps (minutes, hours, days, months) extracted from each input subsequence. Each timestamp is transformed through a sinusoidal function, capturing periodic behaviors. 
+These signals are then projected into a higher-dimensional space via a 1D convolution (kernel size = 1). 
+This approach provides a more **time-aware** embedding than standard positional encoding, helping the model better handle real-world temporal patterns. 
 
 
 ## Contributors
 
 * Adrien Petralia (Université Paris Cité, EDF Research)
 * Philippe Charpentier (EDF Research)
-* Youssef Kadhi Charpentier (EDF Research)
+* Youssef Kadhi (EDF Research)
 * Themis Palpanas (IUF, Université Paris Cité) 
 
