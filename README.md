@@ -11,7 +11,7 @@ NILM aims to disaggregate a household’s total power consumption and retrieve t
 We introduce **NILMFormer**, a sequence-to-sequence Transformer-based architecture designed to tackle this problem.
 
 <p align="center">
-    <img width="450" src="https://github.com/adrienpetralia/NILMFormer/blob/main/Ressources/Intro.png" alt="Intro image">
+    <img width="450" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/Intro.png" alt="Intro image">
 </p>
 
 ## Outline 📝
