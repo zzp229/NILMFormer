@@ -83,6 +83,11 @@ Moreover, detailed timestamp information is always available in real-world NILM 
 Thus, using a PE based on timestamp information can help the model better understand the recurrent use of appliances. 
 Timestamp-based PEs have been briefly investigated for time series forecasting but were always combined with a fixed or learnable PE and directly added to the extracted features.
 
+<p align="center">
+    <img width="250" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/timerpe.png" alt="TimeRPE module">
+</p>
+
+
 Therefore, we proposed the Timestamps Related Positional Encoding (TimeRPE), a Positional Encoding based only on the discrete timestamp values extracted from the input subsequences.
 The TimeRPE module, depicted in Figure~\ref{fig:nilmformerparts} (c), takes as input the timestamps information $t$ from the input subsequences, decomposes it such as minutes $t^m$, hours $t^h$, days $t^d$, and months $t^M$, and project them in a sinusoidal basis, as:
 
