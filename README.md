@@ -35,7 +35,7 @@ uv sync
 
 ### Launch an Experiment ⚙️
 
-To run a *specific* experiment, use the command below:
+To run a **specific** experiment, use the command below:
 ```
 uv run -m expes.launch_one_expe \
     --dataset "UKDALE" \
@@ -46,7 +46,7 @@ uv run -m expes.launch_one_expe \
     --seed 0
 ```
 
-To run all experiments conducted in our paper (this may take some time), use:
+To run **all** experiments conducted in our paper (this may take some time), use:
 ```
 . expes/run_all_expes.sh
 ```
