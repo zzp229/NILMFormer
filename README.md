@@ -61,20 +61,21 @@ To run **all** experiments conducted in our paper (this may take some time), use
 
 
 ### Architecture Details
+
+<p align="center">
+    <img width="180" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/nilmformer.png" alt="NILMFormer Architecture">
+</p>
+
 To handle the non-stationarity aspect of electricity consumption data, NILMFormer operates by first stationnarizing the input subsequence by subtracting its mean and standard deviation.
 While the normalized subsequence is passed through a robust convolutional block that serves as a features extractor, the removed statistics are linearly projected in a higher space (referred to as *TokenStats*), and the timestamps are used by the proposed TimeRPE module to compute a positional encoding matrix.
 These features are concatenated and fed into the Transformer block, followed by a simple Head to obtain a 1D sequence of values.
 The final step consists of linearly projecting back the *TokenStats* (referred to as *ProjStats*) to 2 scalar values that are then used to denormalize the output, providing the final individual appliance consumption.
 
-<p align="center">
-    <img width="250" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/nilmformer.png" alt="NILMFormer Architecture">
-</p>
-
 
 #### TimeRPE
 
 <p align="center">
-    <img width="250" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/timerpe.png" alt="TimeRPE module">
+    <img width="180" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/timerpe.png" alt="TimeRPE module">
 </p>
 
 **Timestamps-Related Positional Encoding (TimeRPE)** leverages discrete timestamps (minutes, hours, days, months) extracted from each input subsequence. Each timestamp is transformed through a sinusoidal function, capturing periodic behaviors. 
