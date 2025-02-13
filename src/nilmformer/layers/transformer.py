@@ -74,10 +74,13 @@ class DiagonnalyMaskedSelfAttention(nn.Module):
 
         if self.use_efficient_attention:
             output = xops.memory_efficient_attention(
-                xq, xk, xv, attn_bias=(diag_mask.mask).repeat(1, self.n_heads, 1, 1).float(), p=self.dropout
+                xq,
+                xk,
+                xv,
+                attn_bias=(diag_mask.mask).repeat(1, self.n_heads, 1, 1).float(),
+                p=self.dropout,
             )
         else:
-
             scale = 1.0 / xq.shape[-1] ** 0.5
             scores = torch.einsum("blhe,bshe->bhls", xq, xk)
             attn = self.attn_dropout(

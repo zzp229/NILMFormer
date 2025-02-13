@@ -77,6 +77,7 @@ class SquaredReLU(Module):
     """
     Squared ReLU activation
     """
+
     def __init__(self):
         super().__init__()
         self.relu = nn.ReLU()

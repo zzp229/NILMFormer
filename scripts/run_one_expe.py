@@ -94,10 +94,11 @@ def launch_one_experiment(expes_config: OmegaConf):
     data = scaler.fit_transform(data)
 
     expes_config.cutoff = float(scaler.appliance_stat2[0])
-    expes_config.threshold = data_builder.appliance_param[expes_config.app]["min_threshold"]
+    expes_config.threshold = data_builder.appliance_param[expes_config.app][
+        "min_threshold"
+    ]
 
     if expes_config.name_model in ["ConvNet", "ResNet", "Inception"]:
-        
         X, y = nilmdataset_to_tser(data)
 
         data_train = scaler.transform(data_train)
@@ -116,7 +117,6 @@ def launch_one_experiment(expes_config: OmegaConf):
         )
 
     else:
-
         data_train = scaler.transform(data_train)
         data_valid = scaler.transform(data_valid)
         data_test = scaler.transform(data_test)
@@ -169,8 +169,11 @@ def main(dataset, sampling_rate, window_size, appliance, name_model, seed):
         if dataset in datasets_config:
             datasets_config = datasets_config[dataset]
         else:
-            raise ValueError("Dataset {} unknown. Only 'UKDALE' and 'REFIT' available."
-                             .format(dataset))
+            raise ValueError(
+                "Dataset {} unknown. Only 'UKDALE' and 'REFIT' available.".format(
+                    dataset
+                )
+            )
 
     with open("configs/models.yaml", "r") as f:
         baselines_config = yaml.safe_load(f)
@@ -179,16 +182,22 @@ def main(dataset, sampling_rate, window_size, appliance, name_model, seed):
         if name_model in baselines_config:
             expes_config.update(baselines_config[name_model])
         else:
-            raise ValueError("Model {} unknown. List of implemented baselines: {}"
-                             .format(name_model, list(baselines_config.keys())))
+            raise ValueError(
+                "Model {} unknown. List of implemented baselines: {}".format(
+                    name_model, list(baselines_config.keys())
+                )
+            )
 
     # Selected appliance check
     if appliance in datasets_config:
         expes_config.update(datasets_config[appliance])
     else:
         logging.error("Appliance '%s' not found in datasets_config.", appliance)
-        raise ValueError("Appliance {} unknown. List of available appliances (for selected {} dataset): {}, "
-                         .format(appliance,  dataset, list(datasets_config.keys())))
+        raise ValueError(
+            "Appliance {} unknown. List of available appliances (for selected {} dataset): {}, ".format(
+                appliance, dataset, list(datasets_config.keys())
+            )
+        )
 
     # Display experiment config with passed parameters
     logging.info("---- Run experiments with provided parameters ----")

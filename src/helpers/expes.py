@@ -204,7 +204,7 @@ def nilm_model_training(inst_model, tuple_data, scaler, expes_config):
             list_exo_variables=["hour", "dow", "month"],
             cosinbase=False,
             newRange=(-0.5, 0.5),
-            threshold_small_values=expes_config.threshold
+            threshold_small_values=expes_config.threshold,
         )
     else:
         eval_win_energy_aggregation(
