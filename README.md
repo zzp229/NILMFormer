@@ -1,12 +1,6 @@
 # NILMFormer
 
-<p align="center">
-    <img width="250" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/intro.png" alt="Intro image">
-</p>
-
-
-
-Official PyTorch codebase for **NILMFormer: A Sequence-To-Sequence Non-Stationarity Aware Transformer for Non-Intrusive Load Monitoring**.
+Official PyTorch codebase for **NILMFormer: Non-Intrusive Load Monitoring that Accounts for Non-Stationarity**.
 
 Millions of smart meters have been deployed worldwide, collecting the power consumed by individual households. Based on these measurements, electricity suppliers provide feedback on consumption behaviors. To help customers better understand their usage, suppliers need to provide **detailed** (per-appliance) feedback—a challenging problem known as **Non-Intrusive Load Monitoring (NILM)**.
 
