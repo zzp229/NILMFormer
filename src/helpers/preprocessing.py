@@ -539,7 +539,7 @@ class UKDALE_DataBuilder(object):
 
             tmp_st_date = pd.DataFrame(
                 data=tmp_list_st_date,
-                index=[indice for j in range(cpt)],
+                index=[indice for _ in range(cpt)],
                 columns=["start_date"],
             )
             output_data = (

@@ -17,8 +17,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from torch.autograd import Variable
-
 from src.helpers.metrics import NILMmetrics
 
 
@@ -252,12 +250,12 @@ class SeqToSeqTrainer:
                 self.model.eval()
 
                 # ===================variables=================== #
-                ts_agg = Variable(ts_agg.float()).to(self.device)
+                ts_agg = torch.Tensor(ts_agg.float()).to(self.device)
 
                 if self.consumption_pred:
-                    target = Variable(appl.float()).to(self.device)
+                    target = torch.Tensor(appl.float()).to(self.device)
                 else:
-                    target = Variable(state.float()).to(self.device)
+                    target = torch.Tensor(state.float()).to(self.device)
 
                 # ===================forward and loss===================== #
                 if self.loss_in_model:
@@ -433,12 +431,11 @@ class SeqToSeqTrainer:
             self.model.train()
 
             # ===================variables=================== #
-            ts_agg = Variable(ts_agg.float()).to(self.device)
-
+            ts_agg = torch.Tensor(ts_agg.float()).to(self.device)
             if self.consumption_pred:
-                target = Variable(appl.float()).to(self.device)
+                target = torch.Tensor(appl.float()).to(self.device)
             else:
-                target = Variable(states.float()).to(self.device)
+                target = torch.Tensor(states.float()).to(self.device)
 
             # ===================forward===================== #
             self.optimizer.zero_grad()
@@ -474,11 +471,11 @@ class SeqToSeqTrainer:
 
                 # ===================variables=================== #
 
-                ts_agg = Variable(ts_agg.float()).to(self.device)
+                ts_agg = torch.Tensor(ts_agg.float()).to(self.device)
                 if self.consumption_pred:
-                    target = Variable(appl.float()).to(self.device)
+                    target = torch.Tensor(appl.float()).to(self.device)
                 else:
-                    target = Variable(states.float()).to(self.device)
+                    target = torch.Tensor(states.float()).to(self.device)
 
                 # ===================forward=================== #
                 if self.loss_in_model:
@@ -711,8 +708,8 @@ class TserTrainer:
                 self.model.eval()
 
                 # ===================variables=================== #
-                ts_agg = Variable(ts_agg.float()).to(self.device)
-                target = Variable(target.float()).to(self.device)
+                ts_agg = torch.Tensor(ts_agg.float()).to(self.device)
+                target = torch.Tensor(target.float()).to(self.device)
 
                 if len(target.shape) == 1:
                     target = target.unsqueeze(1)
@@ -823,8 +820,8 @@ class TserTrainer:
             self.model.train()
 
             # ===================variables=================== #
-            ts_agg = Variable(ts_agg.float()).to(self.device)
-            target = Variable(target.float()).to(self.device)
+            ts_agg = torch.Tensor(ts_agg.float()).to(self.device)
+            target = torch.Tensor(target.float()).to(self.device)
 
             if len(target.shape) == 1:
                 target = target.unsqueeze(1)
@@ -859,8 +856,8 @@ class TserTrainer:
                 self.model.eval()
 
                 # ===================variables=================== #
-                ts_agg = Variable(ts_agg.float()).to(self.device)
-                target = Variable(target.float()).to(self.device)
+                ts_agg = torch.Tensor(ts_agg.float(), device=self.device)
+                target = torch.Tensor(target.float(), device=self.device)
 
                 if len(target.shape) == 1:
                     target = target.unsqueeze(1)
@@ -1101,7 +1098,7 @@ class BasedSelfPretrainer(object):
         for i, ts in enumerate(self.train_loader):
             self.model.train()
             # ===================variables=================== #
-            ts = Variable(ts.float())
+            ts = torch.Tensor(ts.float()).to(self.device)
             if self.mask is not None:
                 mask_loss, ts_masked = self.mask(ts)
             # ===================forward===================== #
@@ -1138,7 +1135,7 @@ class BasedSelfPretrainer(object):
             for ts in self.valid_loader:
                 self.model.eval()
                 # ===================variables=================== #
-                ts = Variable(ts.float())
+                ts = torch.Tensor(ts.float()).to(self.device)
                 if self.mask is not None:
                     mask_loss, ts_masked = self.mask(ts)
                 # ===================forward===================== #

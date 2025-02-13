@@ -38,14 +38,14 @@ uv sync
 ```
 .
 ├── assets                 # assets for the README file 
-├── configs                # configs directory folder (i.e., '.yaml' files)
-├── data                   # data folder
+├── configs                # configs folder (i.e., '.yaml' files)
+├── data                   # data info folder
 ├── scripts                # scripts to launch experiments
 │   ├── run_one_expe.py    #   python script to launch one experiment
 │   └── run_all_expe.sh    #   bash script to launch all experiments
 ├── src                    # source package
-│   ├── helpers            #   helper functions(data processing, training loops, metrics, ...)
-│   ├── baselines          #   nilm and tser baseline
+│   ├── helpers            #   helper functions (processing, training loops, metrics, ...)
+│   ├── baselines          #   nilm and tser baselines
 │   └── nilmformer         #   nilmformer model
 ├── pyproject.toml         # project setup file
 └── uv.lock                # lock to resolve dependencies

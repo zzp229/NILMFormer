@@ -10,7 +10,7 @@ import torch.nn as nn
 
 
 class BiLSTM(nn.Module):
-    def __init__(self, window_size, downstreamtask="seq2seq", c_in=1):
+    def __init__(self, window_size, c_in=1, downstreamtask="seq2seq"):
         """
         BiLSTM implementation from Kelly et al. paper
         """

@@ -11,7 +11,15 @@ import torch.nn as nn
 
 
 class ResUnit(nn.Module):
-    def __init__(self, c_in, c_out, k=8, dilation=1, stride=1, bias=True):
+    def __init__(
+        self,
+        c_in: int,
+        c_out: int,
+        k: int = 8,
+        dilation: int = 1,
+        stride: int = 1,
+        bias: bool = True,
+    ):
         super().__init__()
 
         self.layers = nn.Sequential(
@@ -33,7 +41,7 @@ class ResUnit(nn.Module):
         else:
             self.match_residual = False
 
-    def forward(self, x):
+    def forward(self, x) -> torch.Tensor:
         if self.match_residual:
             x_bottleneck = self.conv(x)
             x = self.layers(x)
@@ -45,7 +53,12 @@ class ResUnit(nn.Module):
 
 class DilatedBlock(nn.Module):
     def __init__(
-        self, c_in=32, c_out=32, kernel_size=8, dilation_list=[1, 2, 4, 8], bias=True
+        self,
+        c_in: int = 32,
+        c_out: int = 32,
+        kernel_size: int = 8,
+        dilation_list: list = [1, 2, 4, 8],
+        bias: bool = True,
     ):
         super().__init__()
 
@@ -61,6 +74,5 @@ class DilatedBlock(nn.Module):
                 )
         self.network = torch.nn.Sequential(*layers)
 
-    def forward(self, x):
-        x = self.network(x)
-        return x
+    def forward(self, x) -> torch.Tensor:
+        return self.network(x)

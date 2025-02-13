@@ -2,7 +2,7 @@
 #
 # @copyright : ©2025 EDF
 # @author : Adrien Petralia
-# @description : FCN baseline 
+# @description : FCN baseline
 #
 #################################################################################################################
 
@@ -12,7 +12,7 @@ import torch.nn as nn
 
 # ======================= Simple Fully Convolutional Network (Zhang, AAAI 2018) =======================#
 class FCN(nn.Module):
-    def __init__(self, window_size, downstreamtask="seq2seq", c_in=1):
+    def __init__(self, window_size, c_in=1, downstreamtask="seq2seq"):
         """
         FCN Pytorch implementation as described in the original paper "Sequence-to-point learning with neural networks for non-intrusive load monitoring".
 

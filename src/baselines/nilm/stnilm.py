@@ -126,9 +126,13 @@ class STNILM(nn.Module):
                 continue
             else:
                 with torch.no_grad():
-                    l = (1.0 + math.erf(((lower - mean) / std) / math.sqrt(2.0))) / 2.0
-                    u = (1.0 + math.erf(((upper - mean) / std) / math.sqrt(2.0))) / 2.0
-                    p.uniform_(2 * l - 1, 2 * u - 1)
+                    from_l = (
+                        1.0 + math.erf(((lower - mean) / std) / math.sqrt(2.0))
+                    ) / 2.0
+                    to_u = (
+                        1.0 + math.erf(((upper - mean) / std) / math.sqrt(2.0))
+                    ) / 2.0
+                    p.uniform_(2 * from_l - 1, 2 * to_u - 1)
                     p.erfinv_()
                     p.mul_(std * math.sqrt(2.0))
                     p.add_(mean)

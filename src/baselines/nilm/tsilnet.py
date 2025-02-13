@@ -2,7 +2,7 @@
 #
 # @copyright : ©2025 EDF
 # @author : Adrien Petralia
-# @description : NILMFormer - TSILNet baseline
+# @description : TSILNet baseline
 #
 #################################################################################################################
 

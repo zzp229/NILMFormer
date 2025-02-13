@@ -614,7 +614,7 @@ class NILMDataset(torch.utils.data.Dataset):
 
         return np_extra
 
-    def normalize(self, x, xmin=None, xmax=None, newRange=(-1, 1)):
+    def _normalize(self, x, xmin=None, xmax=None, newRange=(-1, 1)):
         if xmin is None:
             xmin = np.min(x)
         if xmax is None:

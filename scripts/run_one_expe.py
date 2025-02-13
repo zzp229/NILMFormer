@@ -11,6 +11,8 @@ import yaml
 import logging
 import numpy as np
 
+from omegaconf import OmegaConf
+
 from src.helpers.utils import create_dir
 from src.helpers.preprocessing import (
     UKDALE_DataBuilder,
@@ -20,35 +22,31 @@ from src.helpers.preprocessing import (
     nilmdataset_to_tser,
 )
 from src.helpers.dataset import NILMscaler
-from src.helpers.expes_helpers import launch_models_training
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+from src.helpers.expes import launch_models_training
 
 
-def launch_one_experiment(expes_config):
-    np.random.seed(seed=expes_config["seed"])
+def launch_one_experiment(expes_config: OmegaConf):
+    np.random.seed(seed=expes_config.seed)
 
-    logging.info("Process data...")
-    if expes_config["dataset"] == "UKDALE":
+    logging.info("Process data ...")
+    if expes_config.dataset == "UKDALE":
         data_builder = UKDALE_DataBuilder(
-            data_path="data/UKDALE/",
-            mask_app=expes_config["app"],
-            sampling_rate=expes_config["sampling_rate"],
-            window_size=expes_config["window_size"],
+            data_path=f"{expes_config.data_path}/UKDALE/",
+            mask_app=expes_config.app,
+            sampling_rate=expes_config.sampling_rate,
+            window_size=expes_config.window_size,
         )
 
         data, st_date = data_builder.get_nilm_dataset(house_indicies=[1, 2, 3, 4, 5])
 
-        if isinstance(expes_config["window_size"], str):
-            expes_config["window_size"] = data_builder.window_size
+        if isinstance(expes_config.window_size, str):
+            expes_config.window_size = data_builder.window_size
 
         data_train, st_date_train = data_builder.get_nilm_dataset(
-            house_indicies=expes_config["ind_house_train"]
+            house_indicies=expes_config.ind_house_train
         )
         data_test, st_date_test = data_builder.get_nilm_dataset(
-            house_indicies=expes_config["ind_house_test"]
+            house_indicies=expes_config.ind_house_test
         )
 
         data_train, st_date_train, data_valid, st_date_valid = (
@@ -56,62 +54,51 @@ def launch_one_experiment(expes_config):
                 data_train,
                 st_date_train,
                 perc_house_test=0.2,
-                seed=expes_config["seed"],
+                seed=expes_config.seed,
             )
         )
 
-    elif expes_config["dataset"] == "REFIT":
+    elif expes_config.dataset == "REFIT":
         data_builder = REFIT_DataBuilder(
-            data_path="data/REFIT/RAW_DATA_CLEAN/",
-            mask_app=expes_config["app"],
-            sampling_rate=expes_config["sampling_rate"],
-            window_size=expes_config["window_size"],
+            data_path=f"{expes_config.data_path}/REFIT/RAW_DATA_CLEAN/",
+            mask_app=expes_config.app,
+            sampling_rate=expes_config.sampling_rate,
+            window_size=expes_config.window_size,
         )
 
         data, st_date = data_builder.get_nilm_dataset(
-            house_indicies=expes_config["house_with_app_i"]
+            house_indicies=expes_config.house_with_app_i
         )
 
-        if isinstance(expes_config["window_size"], str):
-            expes_config["window_size"] = data_builder.window_size
+        if isinstance(expes_config.window_size, str):
+            expes_config.window_size = data_builder.window_size
 
         data_train, st_date_train, data_test, st_date_test = (
             split_train_test_pdl_nilmdataset(
-                data.copy(), st_date.copy(), nb_house_test=2, seed=expes_config["seed"]
+                data.copy(), st_date.copy(), nb_house_test=2, seed=expes_config.seed
             )
         )
-
-        scaler = NILMscaler(
-            power_scaling_type=expes_config["power_scaling_type"],
-            appliance_scaling_type=expes_config["appliance_scaling_type"],
-        )
-        data = scaler.fit_transform(data)
-        expes_config["scaler"] = scaler
-        expes_config["cutoff"] = scaler.appliance_stat2[0]
-        expes_config["threshold"] = data_builder.appliance_param[expes_config["app"]][
-            "min_threshold"
-        ]
-
-        data_train = scaler.transform(data_train)
-        data_test = scaler.transform(data_test)
 
         data_train, st_date_train, data_valid, st_date_valid = (
             split_train_test_pdl_nilmdataset(
-                data_train, st_date_train, nb_house_test=1, seed=expes_config["seed"]
+                data_train, st_date_train, nb_house_test=1, seed=expes_config.seed
             )
         )
 
-    logging.info("  Done.")
+    logging.info("             ... Done.")
 
     scaler = NILMscaler(
-        power_scaling_type=expes_config["power_scaling_type"],
-        appliance_scaling_type=expes_config["appliance_scaling_type"],
+        power_scaling_type=expes_config.power_scaling_type,
+        appliance_scaling_type=expes_config.appliance_scaling_type,
     )
     data = scaler.fit_transform(data)
 
-    if expes_config["name_model"] in ["ConvNet", "ResNet", "Inception"]:
+    expes_config.cutoff = float(scaler.appliance_stat2[0])
+    expes_config.threshold = data_builder.appliance_param[expes_config.app]["min_threshold"]
+
+    if expes_config.name_model in ["ConvNet", "ResNet", "Inception"]:
+        
         X, y = nilmdataset_to_tser(data)
-        expes_config["scaler"] = scaler
 
         data_train = scaler.transform(data_train)
         data_valid = scaler.transform(data_valid)
@@ -129,11 +116,6 @@ def launch_one_experiment(expes_config):
         )
 
     else:
-        expes_config["scaler"] = scaler
-        expes_config["cutoff"] = scaler.appliance_stat2[0]
-        expes_config["threshold"] = data_builder.appliance_param[expes_config["app"]][
-            "min_threshold"
-        ]
 
         data_train = scaler.transform(data_train)
         data_valid = scaler.transform(data_valid)
@@ -150,7 +132,7 @@ def launch_one_experiment(expes_config):
             st_date,
         )
 
-    launch_models_training(tuple_data, expes_config)
+    launch_models_training(tuple_data, scaler, expes_config)
 
 
 def main(dataset, sampling_rate, window_size, appliance, name_model, seed):
@@ -176,30 +158,47 @@ def main(dataset, sampling_rate, window_size, appliance, name_model, seed):
             window_size,
         )
 
-    logging.info("Dataset: %s", dataset)
-    logging.info("Sampling Rate: %s", sampling_rate)
-    logging.info("Window Size: %s", window_size)
-    logging.info("Appliance : %s", appliance)
-    logging.info("Model: %s", name_model)
-    logging.info("Seed: %s", seed)
-
     # Load configurations
-    with open("configs/expes_config.yaml", "r") as f:
+    with open("configs/expes.yaml", "r") as f:
         expes_config = yaml.safe_load(f)
 
-    with open("configs/datasets_config.yaml", "r") as f:
+    with open("configs/datasets.yaml", "r") as f:
         datasets_config = yaml.safe_load(f)
 
+        # Dataset name check
         if dataset in datasets_config:
             datasets_config = datasets_config[dataset]
         else:
-            logging.error("Wrong dataset name : '%s'.", dataset)
+            raise ValueError("Dataset {} unknown. Only 'UKDALE' and 'REFIT' available."
+                             .format(dataset))
 
-    with open("configs/models_config.yaml", "r") as f:
+    with open("configs/models.yaml", "r") as f:
         baselines_config = yaml.safe_load(f)
 
-        if name_model not in baselines_config:
-            logging.error("Wrong model name : '%s'.", name_model)
+        # Selected baseline check
+        if name_model in baselines_config:
+            expes_config.update(baselines_config[name_model])
+        else:
+            raise ValueError("Model {} unknown. List of implemented baselines: {}"
+                             .format(name_model, list(baselines_config.keys())))
+
+    # Selected appliance check
+    if appliance in datasets_config:
+        expes_config.update(datasets_config[appliance])
+    else:
+        logging.error("Appliance '%s' not found in datasets_config.", appliance)
+        raise ValueError("Appliance {} unknown. List of available appliances (for selected {} dataset): {}, "
+                         .format(appliance,  dataset, list(datasets_config.keys())))
+
+    # Display experiment config with passed parameters
+    logging.info("---- Run experiments with provided parameters ----")
+    logging.info("      Dataset: %s", dataset)
+    logging.info("      Sampling Rate: %s", sampling_rate)
+    logging.info("      Window Size: %s", window_size)
+    logging.info("      Appliance : %s", appliance)
+    logging.info("      Model: %s", name_model)
+    logging.info("      Seed: %s", seed)
+    logging.info("--------------------------------------------------")
 
     # Update experiment config with passed parameters
     expes_config["dataset"] = dataset
@@ -209,27 +208,20 @@ def main(dataset, sampling_rate, window_size, appliance, name_model, seed):
     expes_config["seed"] = seed
     expes_config["name_model"] = name_model
 
-    # Safely update configs if keys exist
-    if appliance in datasets_config:
-        expes_config.update(datasets_config[appliance])
-    else:
-        logging.error("Appliance '%s' not found in datasets_config.", appliance)
-
-    if name_model in baselines_config:
-        expes_config.update(baselines_config[name_model])
-    else:
-        logging.warning("Model '%s' not found in baselines_config.", name_model)
-
     # Create directories for results
-    path_results = create_dir(expes_config["save_path"])
-    path_results = create_dir(f"{path_results}{dataset}_{appliance}_{sampling_rate}/")
-    path_results = create_dir(f"{path_results}{window_size}/")
+    result_path = create_dir(expes_config["result_path"])
+    result_path = create_dir(f"{result_path}{dataset}_{appliance}_{sampling_rate}/")
+    result_path = create_dir(f"{result_path}{window_size}/")
+
+    # Cast to OmegaConf
+    expes_config = OmegaConf.create(expes_config)
 
     # Define the path to save experiment results
-    expes_config["save_path"] = (
-        f"{path_results}{expes_config['name_model']}_{expes_config['seed']}"
+    expes_config.result_path = (
+        f"{result_path}{expes_config.name_model}_{expes_config.seed}"
     )
 
+    # Launch experiments
     launch_one_experiment(expes_config)
 
 

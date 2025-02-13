@@ -85,8 +85,8 @@ class MultiHeadedAttention(nn.Module):
         batch_size = query.size(0)
 
         query, key, value = [
-            l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
-            for l, x in zip(self.linear_layers, (query, key, value))
+            layer(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
+            for layer, x in zip(self.linear_layers, (query, key, value))
         ]
 
         x, _ = self.attention(query, key, value, mask=mask, dropout=self.dropout)
@@ -225,9 +225,13 @@ class BERT4NILM(nn.Module):
                 continue
             else:
                 with torch.no_grad():
-                    l = (1.0 + math.erf(((lower - mean) / std) / math.sqrt(2.0))) / 2.0
-                    u = (1.0 + math.erf(((upper - mean) / std) / math.sqrt(2.0))) / 2.0
-                    p.uniform_(2 * l - 1, 2 * u - 1)
+                    from_l = (
+                        1.0 + math.erf(((lower - mean) / std) / math.sqrt(2.0))
+                    ) / 2.0
+                    to_u = (
+                        1.0 + math.erf(((upper - mean) / std) / math.sqrt(2.0))
+                    ) / 2.0
+                    p.uniform_(2 * from_l - 1, 2 * to_u - 1)
                     p.erfinv_()
                     p.mul_(std * math.sqrt(2.0))
                     p.add_(mean)

@@ -1,4 +1,5 @@
-save_path: !!str result/
+data_path: !!str /home/I50280/Datasets/PublicDatasets/ #data/
+result_path: !!str result/
 dataset: !!str UKDALE
 name_model: !!str NILMFormer
 sampling_rate: !!str 1min

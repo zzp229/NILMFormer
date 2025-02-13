@@ -26,10 +26,10 @@ class Encoder(nn.Module):
                 [Conv1D(n_channels, n_kernels // 2 ** (n_layers - 1))]
                 + [
                     Conv1D(
-                        n_kernels // 2 ** (n_layers - l),
-                        n_kernels // 2 ** (n_layers - l - 1),
+                        n_kernels // 2 ** (n_layers - layer),
+                        n_kernels // 2 ** (n_layers - layer - 1),
                     )
-                    for l in range(1, n_layers - 1)
+                    for layer in range(1, n_layers - 1)
                 ]
                 + [Conv1D(n_kernels // 2, n_kernels, last=True)]
             )

@@ -75,14 +75,8 @@ elu_feature_map = ActivationFunctionFeatureMap.factory(
 
 class SquaredReLU(Module):
     """
-    ## Squared ReLU activation
-
-    $$y = {\max(x, 0)}^2$$
-
-    Squared ReLU is used as the activation function in the
-     [position wise feedforward module](../feed_forward.html).
+    Squared ReLU activation
     """
-
     def __init__(self):
         super().__init__()
         self.relu = nn.ReLU()

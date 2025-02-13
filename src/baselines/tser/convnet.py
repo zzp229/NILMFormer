@@ -10,53 +10,24 @@ import torch
 import torch.nn as nn
 
 
-class Conv1dSame(torch.nn.Module):
-    def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size,
-        dilation=1,
-        bias=True,
-        padding_layer=torch.nn.ReflectionPad1d,
-    ):
-        super(Conv1dSame, self).__init__()
-        ka = kernel_size // 2
-        kb = ka - 1 if kernel_size % 2 == 0 else ka
-
-        if dilation > 1:
-            ka = ka * dilation
-            kb = kb * dilation
-
-        self.net = torch.nn.Sequential(
-            padding_layer((ka, kb)),
-            torch.nn.Conv1d(
-                in_channels, out_channels, kernel_size, dilation=dilation, bias=bias
-            ),
-        )
-
-    def forward(self, x):
-        return self.net(x)
-
-
 class ConvNet(nn.Module):
     def __init__(self, in_channels=1, nb_class=2):
         super(ConvNet, self).__init__()
 
         self.layer1 = nn.Sequential(
-            Conv1dSame(in_channels=in_channels, out_channels=128, kernel_size=8),
+            nn.Conv1d(in_channels=in_channels, out_channels=128, kernel_size=8),
             nn.BatchNorm1d(128),
             nn.ReLU(),
         )
 
         self.layer2 = nn.Sequential(
-            Conv1dSame(in_channels=128, out_channels=256, kernel_size=5),
+            nn.Conv1d(in_channels=128, out_channels=256, kernel_size=5),
             nn.BatchNorm1d(256),
             nn.ReLU(),
         )
 
         self.layer3 = nn.Sequential(
-            Conv1dSame(in_channels=256, out_channels=128, kernel_size=3),
+            nn.Conv1d(in_channels=256, out_channels=128, kernel_size=3),
             nn.ReLU(),
         )
 

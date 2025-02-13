@@ -13,6 +13,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import xformers.ops as xops
 
+from typing import Any
+
 from src.nilmformer.congif import NILMFormerConfig
 
 
@@ -24,12 +26,19 @@ class DiagonalMaskFromSeqlen:
             ).repeat(B, 1, 1, 1)
 
     @property
-    def mask(self):
+    def mask(self) -> torch.Tensor:
         return self._mask
 
 
 class DiagonnalyMaskedSelfAttention(nn.Module):
-    def __init__(self, dim, n_heads, head_dim, dropout, use_efficient_attention=False):
+    def __init__(
+        self,
+        dim: int,
+        n_heads: int,
+        head_dim: int,
+        dropout: float,
+        use_efficient_attention: bool = False,
+    ):
         super().__init__()
 
         self.use_efficient_attention: bool = use_efficient_attention
@@ -64,8 +73,11 @@ class DiagonnalyMaskedSelfAttention(nn.Module):
         diag_mask = DiagonalMaskFromSeqlen(batch, seqlen, device=xq.device)
 
         if self.use_efficient_attention:
-            output = xops.memory_efficient_attention(xq, xk, xv, attn_bias=diag_mask.mask, p=self.dropout)
+            output = xops.memory_efficient_attention(
+                xq, xk, xv, attn_bias=(diag_mask.mask).repeat(1, self.n_heads, 1, 1).float(), p=self.dropout
+            )
         else:
+
             scale = 1.0 / xq.shape[-1] ** 0.5
             scores = torch.einsum("blhe,bshe->bhls", xq, xk)
             attn = self.attn_dropout(
@@ -80,7 +92,13 @@ class DiagonnalyMaskedSelfAttention(nn.Module):
 
 class PositionWiseFeedForward(nn.Module):
     def __init__(
-        self, dim, hidden_dim, dp_rate=0.0, activation=F.gelu, bias1=True, bias2=True
+        self,
+        dim: int,
+        hidden_dim: int,
+        dp_rate: float = 0.0,
+        activation: Any = F.gelu,
+        bias1: bool = True,
+        bias2: bool = True,
     ):
         super().__init__()
         self.layer1 = nn.Linear(dim, hidden_dim, bias=bias1)
@@ -88,7 +106,7 @@ class PositionWiseFeedForward(nn.Module):
         self.dropout = nn.Dropout(dp_rate)
         self.activation = activation
 
-    def forward(self, x):
+    def forward(self, x) -> torch.Tensor:
         x = self.layer2(self.dropout(self.activation(self.layer1(x))))
         return x
 

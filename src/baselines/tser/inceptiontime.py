@@ -66,7 +66,7 @@ class Inception(nn.Module):
             )
         )
 
-        for i in range(n_blocks - 1):
+        for _ in range(n_blocks - 1):
             layers.append(
                 InceptionBlock(
                     in_channels=n_filters * (len(kernel_sizes) + 1),
@@ -75,6 +75,7 @@ class Inception(nn.Module):
                     bottleneck_channels=bottleneck_channels,
                     use_residual=use_residual,
                     activation=activation,
+                    return_indices=return_indices,
                 )
             )
 

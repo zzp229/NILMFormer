@@ -10,6 +10,16 @@ import os
 import matplotlib.pyplot as plt
 
 
+def create_dir(path):
+    os.makedirs(path, exist_ok=True)
+
+    return path
+
+
+def check_file_exist(path):
+    return os.path.isfile(path)
+
+
 def apply_graphics_setting(ax=None, legend_font_size=20, label_fontsize=20):
     if ax is None:
         ax = plt.gca()
@@ -32,13 +42,3 @@ def apply_graphics_setting(ax=None, legend_font_size=20, label_fontsize=20):
         ax.grid(linestyle="-.")
         ax.legend(fontsize=legend_font_size)
         ax.figure.tight_layout()
-
-
-def create_dir(path):
-    os.makedirs(path, exist_ok=True)
-
-    return path
-
-
-def check_file_exist(path):
-    return os.path.isfile(path)
