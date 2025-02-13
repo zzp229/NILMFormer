@@ -11,7 +11,7 @@ import yaml
 import logging
 import numpy as np
 
-from src.helpers.utils import *
+from src.helpers.utils import create_dir
 from src.helpers.preprocessing import (
     UKDALE_DataBuilder,
     REFIT_DataBuilder,
@@ -20,7 +20,7 @@ from src.helpers.preprocessing import (
     nilmdataset_to_tser,
 )
 from src.helpers.dataset import NILMscaler
-from expes.expes_helpers import launch_models_training
+from src.helpers.expes_helpers import launch_models_training
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -184,10 +184,10 @@ def main(dataset, sampling_rate, window_size, appliance, name_model, seed):
     logging.info("Seed: %s", seed)
 
     # Load configurations
-    with open("expes/configs/expes_config.yaml", "r") as f:
+    with open("configs/expes_config.yaml", "r") as f:
         expes_config = yaml.safe_load(f)
 
-    with open("expes/configs/datasets_config.yaml", "r") as f:
+    with open("configs/datasets_config.yaml", "r") as f:
         datasets_config = yaml.safe_load(f)
 
         if dataset in datasets_config:
@@ -195,7 +195,7 @@ def main(dataset, sampling_rate, window_size, appliance, name_model, seed):
         else:
             logging.error("Wrong dataset name : '%s'.", dataset)
 
-    with open("expes/configs/models_config.yaml", "r") as f:
+    with open("configs/models_config.yaml", "r") as f:
         baselines_config = yaml.safe_load(f)
 
         if name_model not in baselines_config:

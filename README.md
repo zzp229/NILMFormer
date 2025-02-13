@@ -1,18 +1,23 @@
-<h1 align="center">NILMFormer</h1>
+# NILMFormer
 
 <p align="center">
-    <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/intro.png" alt="Intro image">
+    <img width="250" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/intro.png" alt="Intro image">
 </p>
 
-<h2 align="center">A Sequence-To-Sequence Non-Stationarity Aware Transformer for Non-Intrusive Load Monitoring</h2>
 
 
-Millions of smart meters have been deployed worldwide, collecting the power consumed by individual households. Based on these measurements, electricity suppliers provide feedback on consumption behaviors.  
-To help customers better understand their usage, suppliers need to provide **detailed** (per-appliance) feedback—a challenging problem known as **Non-Intrusive Load Monitoring (NILM)**.
+Official PyTorch codebase for **NILMFormer: A Sequence-To-Sequence Non-Stationarity Aware Transformer for Non-Intrusive Load Monitoring**.
+
+Millions of smart meters have been deployed worldwide, collecting the power consumed by individual households. Based on these measurements, electricity suppliers provide feedback on consumption behaviors. To help customers better understand their usage, suppliers need to provide **detailed** (per-appliance) feedback—a challenging problem known as **Non-Intrusive Load Monitoring (NILM)**.
 
 NILM aims to disaggregate a household’s total power consumption and retrieve the individual power usage of different appliances. Current state-of-the-art (SotA) solutions rely on deep learning and process household consumption in subsequences. However, real-world smart meter data is **non-stationary**—distribution drifts within each window segment can severely impact model performance.
 
 We introduce **NILMFormer**, a sequence-to-sequence Transformer-based architecture designed to tackle this problem.
+
+<p align="center">
+    <img width="700" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/results_sample.png" alt="Results sample">
+</p>
+
 
 
 ## Outline 📝
@@ -33,11 +38,30 @@ cd NILMFormer
 uv sync
 ```
 
+
+### Code Structure
+
+```
+.
+├── assets                 # assets for the README file 
+├── configs                # configs directory folder (i.e., '.yaml' files)
+├── scripts                # scripts to launch experiments
+│   ├── run_one_expe.py    #   python script to launch one experiment
+│   └── run_all_expe.sh    #   bash script to launch all experiments
+    
+├── src                    # source package
+│   ├── helpers            #   helper functions(data processing, training loops, metrics, ...)
+│   ├── baselines          #   nilm and tser baseline
+│   └── nilmformer         #   nilmformer model
+├── pyproject.toml         # project setup file
+└── uv.lock                # lock to resolve dependencies
+```
+
 ### Launch an Experiment ⚙️
 
 To run a **specific** experiment, use the command below:
 ```
-uv run -m expes.launch_one_expe \
+uv run -m scripts.run_one_expe \
     --dataset "UKDALE" \
     --sampling_rate "1min" \
     --appliance "WashingMachine" \
@@ -48,37 +72,25 @@ uv run -m expes.launch_one_expe \
 
 To run **all** experiments conducted in our paper (this may take some time), use:
 ```
-. expes/run_all_expes.sh
+. scripts/run_all_expe.sh
 ```
 
-## NILMFormer Architecture
+## NILMFormer ⚡
 
 **TL;DR** : **NILMFormer** is a **sequence-to-sequence Transformer-based architecture** purpose-built for **Non-Intrusive Load Monitoring (NILM)**. It tackles the **non-stationary** nature of smart meter data by splitting and separately encoding the **shape**, **temporal** dynamics, and **intrinsic statistics** of each subsequence. These components are then fused within the Transformer block. Finally, the prediction is refined through a **linear transformation** of the input series statistics, accounting for **power loss** in the disaggregation process.
 
-<p align="center">
-    <img width="700" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/results_sample.png" alt="Results Sample">
-</p>
-
-
-### Architecture Details
+### Architecture Details 🔎
 
 <p align="center">
-    <img width="180" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/nilmformer.png" alt="NILMFormer Architecture">
+    <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/nilmformer_details.png" alt="NILMFormer">
 </p>
 
-To handle the non-stationarity aspect of electricity consumption data, NILMFormer operates by first stationnarizing the input subsequence by subtracting its mean and standard deviation.
+**Mechanims to handle Non-Stationarity:** To handle the non-stationarity aspect of electricity consumption data, NILMFormer operates by first stationnarizing the input subsequence by subtracting its mean and standard deviation.
 While the normalized subsequence is passed through a robust convolutional block that serves as a features extractor, the removed statistics are linearly projected in a higher space (referred to as *TokenStats*), and the timestamps are used by the proposed TimeRPE module to compute a positional encoding matrix.
 These features are concatenated and fed into the Transformer block, followed by a simple Head to obtain a 1D sequence of values.
 The final step consists of linearly projecting back the *TokenStats* (referred to as *ProjStats*) to 2 scalar values that are then used to denormalize the output, providing the final individual appliance consumption.
 
-
-#### TimeRPE
-
-<p align="center">
-    <img width="180" src="https://github.com/adrienpetralia/NILMFormer/blob/main/ressources/timerpe.png" alt="TimeRPE module">
-</p>
-
-**Timestamps-Related Positional Encoding (TimeRPE)** leverages discrete timestamps (minutes, hours, days, months) extracted from each input subsequence. Each timestamp is transformed through a sinusoidal function, capturing periodic behaviors. 
+**Timestamps-Related Positional Encoding:** leverages discrete timestamps (minutes, hours, days, months) extracted from each input subsequence. Each timestamp is transformed through a sinusoidal function, capturing periodic behaviors. 
 These signals are then projected into a higher-dimensional space via a 1D convolution (kernel size = 1). 
 This approach provides a more **time-aware** embedding than standard positional encoding, helping the model better handle real-world temporal patterns. 
 
@@ -90,3 +102,7 @@ This approach provides a more **time-aware** embedding than standard positional 
 * Youssef Kadhi (EDF Research)
 * Themis Palpanas (IUF, Université Paris Cité) 
 
+
+## Acknowledgments
+
+Work supported by EDF R&D and ANRT French program.
