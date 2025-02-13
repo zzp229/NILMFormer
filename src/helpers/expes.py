@@ -223,7 +223,7 @@ def nilm_model_training(inst_model, tuple_data, scaler, expes_config):
 
     model_trainer.save()
     logging.info(
-        "Done. Model weights and log save at: {}.pt".format(expes_config.result_path)
+        "Training and eval completed! Model weights and log save at: {}.pt".format(expes_config.result_path)
     )
 
 
