@@ -89,7 +89,7 @@ These signals are then projected into a higher-dimensional space via a 1D convol
 This approach provides a more **time-aware** embedding than standard positional encoding, helping the model better handle real-world temporal patterns. 
 
 
-## Contributors
+## Contributors 👨‍👨‍👦‍👦
 
 * Adrien Petralia (Université Paris Cité, EDF Research)
 * Philippe Charpentier (EDF Research)
