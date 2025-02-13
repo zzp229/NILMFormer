@@ -37,7 +37,7 @@ uv sync
 ```
 
 
-### Code Structure
+### Code Structure 📁
 
 ```
 .
@@ -101,6 +101,6 @@ This approach provides a more **time-aware** embedding than standard positional 
 * Themis Palpanas (IUF, Université Paris Cité) 
 
 
-## Acknowledgments
+## Acknowledgments 🎅
 
 Work supported by EDF R&D and ANRT French program.
