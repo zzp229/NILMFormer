@@ -16,7 +16,7 @@ UKDALE:
   WashingMachine:
     app: !!str washing_machine
     ind_house_train: [1, 3, 4, 5]
-    ind_house_valid: [5] #1
+    ind_house_valid: [5]
     ind_house_test: [2]
   Dishwasher:
     app: !!str dishwasher
