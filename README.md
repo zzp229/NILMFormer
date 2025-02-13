@@ -45,10 +45,10 @@ uv sync
 .
 ├── assets                 # assets for the README file 
 ├── configs                # configs directory folder (i.e., '.yaml' files)
+├── data                   # data folder
 ├── scripts                # scripts to launch experiments
 │   ├── run_one_expe.py    #   python script to launch one experiment
 │   └── run_all_expe.sh    #   bash script to launch all experiments
-    
 ├── src                    # source package
 │   ├── helpers            #   helper functions(data processing, training loops, metrics, ...)
 │   ├── baselines          #   nilm and tser baseline
@@ -82,7 +82,7 @@ To run **all** experiments conducted in our paper (this may take some time), use
 ### Architecture Details 🔎
 
 <p align="center">
-    <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/nilmformer_details.png" alt="NILMFormer">
+    <img width="600" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/nilmformer_details.png" alt="NILMFormer">
 </p>
 
 **Mechanims to handle Non-Stationarity:** To handle the non-stationarity aspect of electricity consumption data, NILMFormer operates by first stationnarizing the input subsequence by subtracting its mean and standard deviation.
