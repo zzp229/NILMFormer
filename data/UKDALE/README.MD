@@ -10,4 +10,4 @@ First, download the "ukdale.zip" file (Zip file 3.5G) from [Jack-kelly website](
 
 ## Preprocessing
 
-Unzipping the files and copy the 5 folders house_1, house_2 ..., house_5 in this directory.
+Unzipping the files and copy the 5 folders House_1, House_2, House_3, House_4, House_5 in this directory.
