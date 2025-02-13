@@ -2,6 +2,10 @@
 
 Official PyTorch codebase for **NILMFormer: Non-Intrusive Load Monitoring that Accounts for Non-Stationarity**.
 
+<p align="center">
+    <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/intro.png" alt="Intro">
+</p>
+
 Millions of smart meters have been deployed worldwide, collecting the power consumed by individual households. Based on these measurements, electricity suppliers provide feedback on consumption behaviors. To help customers better understand their usage, suppliers need to provide **detailed** (per-appliance) feedback—a challenging problem known as **Non-Intrusive Load Monitoring (NILM)**.
 
 NILM aims to disaggregate a household’s total power consumption and retrieve the individual power usage of different appliances. Current state-of-the-art (SotA) solutions rely on deep learning and process household consumption in subsequences. However, real-world smart meter data is **non-stationary**—distribution drifts within each window segment can severely impact model performance.
