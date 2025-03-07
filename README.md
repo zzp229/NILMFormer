@@ -88,7 +88,7 @@ While the normalized subsequence is passed through a robust convolutional block 
 These features are concatenated and fed into the Transformer block, followed by a simple Head to obtain a 1D sequence of values.
 The final step consists of linearly projecting back the *TokenStats* (referred to as *ProjStats*) to 2 scalar values that are then used to denormalize the output, providing the final individual appliance consumption.
 
-**Timestamps-Related Positional Encoding:** leverages discrete timestamps (minutes, hours, days, months) extracted from each input subsequence. Each timestamp is transformed through a sinusoidal function, capturing periodic behaviors. 
+**Timestamps-Related Positional Encoding (TimeRPE):** TimeRPE leverages discrete timestamps (minutes, hours, days, months) extracted from each input subsequence. Each timestamp is transformed through a sinusoidal function, capturing periodic behaviors. 
 These signals are then projected into a higher-dimensional space via a 1D convolution (kernel size = 1). 
 This approach provides a more **time-aware** embedding than standard positional encoding, helping the model better handle real-world temporal patterns. 
 
