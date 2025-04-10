@@ -5,14 +5,14 @@ Use the table below to review and compare the performance of each model across t
 
 ### Overall Results 
 
-The table below show the overall performance for each model averaged accross all datasets, appliances and windows length (best score for each metric is shown in **bold**, second best is <u>underlined</u>).
+The table below show the overall performance for each model averaged accross all datasets, appliances and windows length (best score for each metric is shown in **bold**, second best is <ins>underlined</ins>).
 
 |Model      |MAE  &darr;|MSE &darr;|RMSE &darr;|TECA &uarr;|NDE &darr;|SAE &darr;|MR &uarr;|ACCURACY &uarr;|BALANCED_ACCURACY &uarr;|PRECISION &uarr;|RECALL &uarr;|F1_SCORE &uarr;|
 |-----------|--------------|---|----|------|------------------|------------------|------------------|----------------------|-------------------|--------------------|---------------------|--------------------|
 |**NILMFormer** |**78.511**        |**88866.077**|**237.744**|**0.525** |**0.522**             |**0.329**             |**0.399**             |**0.749**                 |**0.789**              |**0.297**            |0.866               |**0.377**               |
-|BERT4NILM  |92.317        |103974.877|259.172|0.364 |0.647             |0.426             |<u>0.33</u>             |0.48                  |0.675              |0.185               |<u>0.951</u>                |0.252               |
-|STNILM     |<u>88.853</u>        |<u>103806.173</u>|260.46|<u>0.393</u> |0.659             |<u>0.359</u>         |0.326             |<u>0.618</u>                 |<u>0.73</u>               |<u>0.204</u>            |0.935                |<u>0.289</u>               |
-|BiGRU      |100.772       |107147.35|<u>255.042</u>|0.323 |<u>0.57</u>          |0.405             |0.314             |0.491                 |0.679              |0.177               |**0.962**                |0.253               |
+|BERT4NILM  |92.317        |103974.877|259.172|0.364 |0.647             |0.426             |<ins>0.33</ins>             |0.48                  |0.675              |0.185               |<ins>0.951</ins>                |0.252               |
+|STNILM     |<ins>88.853</ins>        |<ins>103806.173</ins>|260.46|<ins>0.393</ins> |0.659             |<ins>0.359</ins>         |0.326             |<ins>0.618</ins>                 |<ins>0.73</ins>               |<ins>0.204</ins>            |0.935                |<ins>0.289</ins>               |
+|BiGRU      |100.772       |107147.35|<ins>255.042</ins>|0.323 |<ins>0.57</ins>          |0.405             |0.314             |0.491                 |0.679              |0.177               |**0.962**                |0.253               |
 |Energformer|99.959        |107796.065|265.014|0.318 |0.666             |0.464             |0.295             |0.496                 |0.671              |0.187               |0.943                |0.264               |
 |FCN        |117.714       |124070.123|278.037|0.19  |0.634             |0.602             |0.26              |0.463                 |0.649              |0.165               |0.922                |0.23                |
 |UNet NILM  |125.1         |142068.911|293.077|0.182 |0.653             |0.518             |0.237             |0.479                 |0.654              |0.165               |0.917                |0.23                |
