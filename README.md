@@ -44,6 +44,7 @@ uv sync
 ├── assets                 # assets for the README file 
 ├── configs                # configs folder (i.e., '.yaml' files)
 ├── data                   # data info folder
+├── results                # detailed experiment results folder
 ├── scripts                # scripts to launch experiments
 │   ├── run_one_expe.py    #   python script to launch one experiment
 │   └── run_all_expe.sh    #   bash script to launch all experiments
