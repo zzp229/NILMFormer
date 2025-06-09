@@ -1,8 +1,8 @@
 # NILMFormer
 
-Official PyTorch codebase for **NILMFormer: Non-Intrusive Load Monitoring that Accounts for Non-Stationarity**.
+Official PyTorch codebase for **NILMFormer: Non-Intrusive Load Monitoring that Accounts for Non-Stationarity** (ACM SIGKDD 2025).
 
-Arxiv preprint: [NILMFormer, KDD 2025](https://arxiv.org/abs/2506.05880). 
+Arxiv preprint: [NILMFormer](https://arxiv.org/abs/2506.05880). 
 
 <p align="center">
     <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/intro.png" alt="Intro">
