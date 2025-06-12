@@ -1,5 +1,13 @@
 # NILMFormer
 
+<div align="center">
+
+[![preprint](https://img.shields.io/static/v1?label=arXiv&message=2502.15637&color=B31B1B&logo=arXiv)](https://arxiv.org/abs/2506.05880)
+[![License: MIT](https://img.shields.io/badge/License-MIT-65A938)](https://opensource.org/license/MIT)
+[![Python](https://img.shields.io/badge/Python-3.9|3.10|3.11|3.12-blue)]()
+
+</div>
+
 Official PyTorch codebase for **NILMFormer: Non-Intrusive Load Monitoring that Accounts for Non-Stationarity** (ACM SIGKDD 2025).
 
 📄 **Paper preprint**: [arxiv:2506.05880](https://arxiv.org/abs/2506.05880).
