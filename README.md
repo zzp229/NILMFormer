@@ -110,6 +110,22 @@ This approach provides a more **time-aware** embedding than standard positional 
 * Youssef Kadhi (EDF Research)
 * Themis Palpanas (IUF, Université Paris Cité) 
 
+## Citing NILMFormer 📚
+
+If you use NILMFormer in your work, please cite our paper:
+
+```bibtex
+@inproceedings{petralia2025nilmformer,
+author = {Petralia, Adrien and Charpentier, Philippe and Kadhi, Youssef and Palpanas, Themis},
+title = {NILMFormer: Non-Intrusive Load Monitoring that Accounts for Non-Stationarity},
+year = {2025},
+publisher = {Association for Computing Machinery},
+doi = {10.1145/3711896.3737251},
+booktitle = {Proceedings of the 31th ACM SIGKDD Conference on Knowledge Discovery \& Data Mining V.2},
+location = {Toronto, ON, Canada},
+series = {KDD '25}
+}
+```
 
 ## Acknowledgments 🎅
 
