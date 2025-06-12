@@ -3,14 +3,14 @@
 <div align="center">
 
 [![preprint](https://img.shields.io/static/v1?label=arXiv&message=2502.15637&color=B31B1B&logo=arXiv)](https://arxiv.org/abs/2506.05880)
-[![License: MIT](https://img.shields.io/badge/License-MIT-65A938)](https://opensource.org/license/MIT)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.9|3.10|3.11|3.12-blue)]()
 
 </div>
 
 Official PyTorch codebase for **NILMFormer: Non-Intrusive Load Monitoring that Accounts for Non-Stationarity** (ACM SIGKDD 2025).
 
-📄 **Paper preprint**: [arxiv:2506.05880](https://arxiv.org/abs/2506.05880).
+📄 **Arxiv preprint**: [NILMFormer](https://arxiv.org/abs/2506.05880).
 
 <p align="center">
     <img width="300" src="https://github.com/adrienpetralia/NILMFormer/blob/main/assets/intro.png" alt="Intro">
