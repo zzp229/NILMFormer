@@ -19,3 +19,8 @@ n_warmup_epochs: !!int 0
 device: !!str cuda
 all_gpu: false
 
+#epochs: !!int 50
+#p_es: !!int 10
+#p_rlr: !!int 5
+#n_warmup_epochs: !!int 5
+

@@ -12,6 +12,7 @@ REFIT:
     app: !!str Microwave
     house_with_app_i: [2, 3, 4, 6, 8, 9, 10, 12, 13, 15, 17, 18, 19, 20]
 
+
 UKDALE:
   WashingMachine:
     app: !!str washing_machine

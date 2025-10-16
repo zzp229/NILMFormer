@@ -539,7 +539,7 @@ class UKDALE_DataBuilder(object):
 
             tmp_st_date = pd.DataFrame(
                 data=tmp_list_st_date,
-                index=[indice for _ in range(cpt)],
+                index=[indice for j in range(cpt)],
                 columns=["start_date"],
             )
             output_data = (
@@ -619,7 +619,7 @@ class UKDALE_DataBuilder(object):
 
         Return : pd.core.frame.DataFrame instance
         """
-        path_house = self.data_path + "House" + str(indice) + os.sep
+        path_house = self.data_path + "house_" + str(indice) + os.sep
         self._check_if_file_exist(
             path_house + "labels.dat"
         )  # Check if labels exist at provided path
@@ -987,6 +987,47 @@ class REFIT_DataBuilder(object):
             )
 
         return output_data, st_date
+
+    def _compute_status(self, initial_status, min_on, min_off, min_activation_time):
+        tmp_status = np.zeros_like(initial_status)
+        status_diff = np.diff(initial_status)
+        events_idx = status_diff.nonzero()
+
+        events_idx = np.array(events_idx).squeeze()
+        events_idx += 1
+
+        if initial_status[0]:
+            events_idx = np.insert(events_idx, 0, 0)
+
+        if initial_status[-1]:
+            events_idx = np.insert(events_idx, events_idx.size, initial_status.size)
+
+        events_idx = events_idx.reshape((-1, 2))
+        on_events = events_idx[:, 0].copy()
+        off_events = events_idx[:, 1].copy()
+        assert len(on_events) == len(off_events)
+
+        if len(on_events) > 0:
+            off_duration = on_events[1:] - off_events[:-1]
+            off_duration = np.insert(off_duration, 0, 1000)
+            on_events = on_events[off_duration > min_off]
+            off_events = off_events[np.roll(off_duration, -1) > min_off]
+
+            on_duration = off_events - on_events
+            on_events = on_events[on_duration >= min_on]
+            off_events = off_events[on_duration >= min_on]
+            assert len(on_events) == len(off_events)
+
+        # Filter activations based on minimum continuous points after applying min_on and min_off
+        activation_durations = off_events - on_events
+        valid_activations = activation_durations >= min_activation_time
+        on_events = on_events[valid_activations]
+        off_events = off_events[valid_activations]
+
+        for on, off in zip(on_events, off_events):
+            tmp_status[on:off] = 1
+
+        return tmp_status
 
     def _get_stems(self, dataframe):
         """

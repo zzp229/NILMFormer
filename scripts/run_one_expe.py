@@ -192,12 +192,21 @@ def main(dataset, sampling_rate, window_size, appliance, name_model, seed):
     if appliance in datasets_config:
         expes_config.update(datasets_config[appliance])
     else:
-        logging.error("Appliance '%s' not found in datasets_config.", appliance)
-        raise ValueError(
-            "Appliance {} unknown. List of available appliances (for selected {} dataset): {}, ".format(
-                appliance, dataset, list(datasets_config.keys())
+        # Try to match by app field
+        found = False
+        for key, val in datasets_config.items():
+            if isinstance(val, dict) and val.get('app', None) == appliance:
+                expes_config.update(val)
+                appliance = key  # Use the config key for naming consistency
+                found = True
+                break
+        if not found:
+            logging.error("Appliance '%s' not found in datasets_config.", appliance)
+            raise ValueError(
+                "Appliance {} unknown. List of available appliances (for selected {} dataset): {}, ".format(
+                    appliance, dataset, list(datasets_config.keys())
+                )
             )
-        )
 
     # Display experiment config with passed parameters
     logging.info("---- Run experiments with provided parameters ----")
