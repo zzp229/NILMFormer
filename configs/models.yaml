@@ -31,7 +31,8 @@ CNN1D:
     wd: !!float 0
     training_in_model: false
 
-UNET_NILM:
+#这个原本模型用名字UNET_NILM也跑不起来
+UNetNILM:
   model_kwargs:
     num_layers: 4
     features_start: 8
@@ -55,6 +56,7 @@ FCN:
     wd: !!float 0
     training_in_model: false
 
+#没跑，好像没这个啊
 DResNet:
   model_kwargs:
     kernel_size: 3
@@ -120,6 +122,7 @@ TSILNet:
     wd: !!float 0
     training_in_model: false
 
+
 Energformer:
   model_kwargs:
     c_out: 1
@@ -148,6 +151,7 @@ ResNet:
     lr: !!float 1e-3
     wd: !!float 0
 
+#这个也改了，修改新版语法
 Inception:
   model_kwargs:
     n_filters: 32

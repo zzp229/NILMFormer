@@ -102,6 +102,46 @@ def display_results(result_path):
         else:
             print(valid_metrics)
 
+    # region 脚本解释
+    # Display comparison between validation and test
+    if 'valid_metrics_timestamp' in results and 'test_metrics_timestamp' in results:
+        print("\n" + "=" * 80)
+        print("📊 Validation vs Test Comparison (Timestamp-level):")
+        print("=" * 80)
+        print("💡 Tip: Test Set is the FINAL evaluation - this is what you should report!")
+        print("-" * 80)
+
+        valid_metrics = results['valid_metrics_timestamp']
+        test_metrics = results['test_metrics_timestamp']
+
+        # Define key metrics to compare
+        key_metrics = ['MAE', 'RMSE', 'TECA', 'F1_SCORE', 'ACCURACY', 'PRECISION', 'RECALL']
+
+        print(f"{'Metric':<20} {'Validation':>15} {'Test':>15} {'Difference':>15}")
+        print("-" * 80)
+
+        for metric in key_metrics:
+            if metric in valid_metrics and metric in test_metrics:
+                valid_val = valid_metrics[metric]
+                test_val = test_metrics[metric]
+                diff = test_val - valid_val
+
+                # Add emoji indicator
+                if metric in ['MAE', 'RMSE', 'MSE']:
+                    # Lower is better
+                    emoji = "✅" if diff < 0 else "⚠️"
+                else:
+                    # Higher is better
+                    emoji = "✅" if diff > 0 else "⚠️"
+
+                print(f"{metric:<20} {valid_val:>15.6f} {test_val:>15.6f} {diff:>14.6f} {emoji}")
+
+        print("-" * 80)
+        print("✅ = Test performs better than Validation")
+        print("⚠️  = Test performs worse than Validation (may indicate overfitting)")
+
+    # endregion
+
     # Display aggregated metrics (MAE, MSE, TECA at different time scales)
     for freq in ['D', 'W', 'ME']:
         key = f'test_metrics_{freq}'
@@ -146,6 +186,7 @@ if __name__ == "__main__":
         result_file = sys.argv[1]
     else:
         # Default path based on the training command
+        # 修改要读取的模型
         result_file = "result/UKDALE_WashingMachine_1min/128/NILMFormer_0.pt"
 
     try:

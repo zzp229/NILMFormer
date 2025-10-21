@@ -50,7 +50,8 @@ def get_model_instance(name_model, c_in, window_size, **kwargs):
     Get model instances
     """
     if name_model == "BiGRU":
-        inst = BiGRU(c_in=1, **kwargs)
+        # 原本是没有window_size的，不知道他是怎么跑出东西的
+        inst = BiGRU(c_in=1, window_size=window_size, **kwargs)
     elif name_model == "BiLSTM":
         inst = BiLSTM(c_in=1, window_size=window_size, **kwargs)
     elif name_model == "CNN1D":

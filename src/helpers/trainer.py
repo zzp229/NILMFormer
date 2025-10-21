@@ -250,7 +250,9 @@ class SeqToSeqTrainer:
                 self.model.eval()
 
                 # ===================variables=================== #
-                ts_agg = torch.Tensor(ts_agg.float()).to(self.device)
+                # 这个地方改过了，用新版的，不知道会不会影响结果
+                # print('可能影响结果')
+                ts_agg = ts_agg.float().to(self.device)
 
                 if self.consumption_pred:
                     target = torch.Tensor(appl.float()).to(self.device)
@@ -708,8 +710,8 @@ class TserTrainer:
                 self.model.eval()
 
                 # ===================variables=================== #
-                ts_agg = torch.Tensor(ts_agg.float()).to(self.device)
-                target = torch.Tensor(target.float()).to(self.device)
+                ts_agg = ts_agg.float().to(self.device)
+                target = target.float().to(self.device)
 
                 if len(target.shape) == 1:
                     target = target.unsqueeze(1)
@@ -856,8 +858,8 @@ class TserTrainer:
                 self.model.eval()
 
                 # ===================variables=================== #
-                ts_agg = torch.Tensor(ts_agg.float(), device=self.device)
-                target = torch.Tensor(target.float(), device=self.device)
+                ts_agg = ts_agg.float().to(self.device)
+                target = target.float().to(self.device)
 
                 if len(target.shape) == 1:
                     target = target.unsqueeze(1)

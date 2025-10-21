@@ -69,6 +69,7 @@ uv sync
 
 To run a **specific** experiment, use the command below:
 ```
+用： uv run -m scripts.run_one_expe --dataset "UKDALE" --sampling_rate "1min" --window_size 128 --appliance "washing_machine" --name_model NILMFormer --seed 0
 uv run -m scripts.run_one_expe \
     --dataset "UKDALE" \
     --sampling_rate "1min" \
