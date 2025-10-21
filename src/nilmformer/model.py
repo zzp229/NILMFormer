@@ -34,9 +34,18 @@ class NILMFormer(nn.Module):
         n_encoder_layers = NFConfig.n_encoder_layers
         d_model = NFConfig.d_model
 
-        # ============ Embedding ============#
+        # ============ Embedding（输入嵌入层）============#
+        # NILMFormer 的 Input Embedding 由三个组件组成：
+
+        # 一共96维，拆了24维给时间相关信息了
         d_model_ = 3 * d_model // 4  # e.g., if d_model=96 => d_model_=72
 
+        # 【Embedding 组件 1】：DilatedBlock - 处理负荷曲线（主信号）
+        # 作用：用扩张卷积提取负荷曲线的多尺度时序特征
+        # 输入：原始负荷曲线 (B, 1, L) - 这是电器的总功率消耗时间序列
+        # 输出：嵌入特征 (B, 72, L) 当 d_model=96
+        # 关键：通过不同扩张率 [1,2,4,8] 捕获从局部到长期的时序模式
+        ## 总功耗序列
         self.EmbedBlock = DilatedBlock(
             c_in=c_in,
             c_out=d_model_,
@@ -45,12 +54,23 @@ class NILMFormer(nn.Module):
             bias=conv_bias,
         )
 
+        # 【Embedding 组件 2】：ProjEmbedding - 处理时间特征（辅助信号）
+        # 作用：投影外生变量（时间编码：minute, hour, dow, month）
+        # 输入：外生特征 (B, c_embedding, L) - 时间上下文信息
+        #       例如：凌晨3点 vs 晚上8点，工作日 vs 周末
+        # 输出：投影特征 (B, 24, L) 当 d_model=96
+        # 关键：帮助模型理解"什么时候"容易使用某些电器
+        ## 时间特征编码，提供时间上下文
         self.ProjEmbedding = nn.Conv1d(
-            in_channels=c_embedding, out_channels=d_model // 4, kernel_size=1
+            in_channels=c_embedding,
+            out_channels=d_model // 4,
+            kernel_size=1
         )
 
-        self.ProjStats1 = nn.Linear(2, d_model)
-        self.ProjStats2 = nn.Linear(d_model, 2)
+        # 【Embedding 组件 3】：ProjStats - 处理统计信息（全局上下文）
+        # 用于 Instance Normalization 的可学习投影
+        self.ProjStats1 = nn.Linear(2, d_model)  # (mean, std) -> d_model
+        self.ProjStats2 = nn.Linear(d_model, 2)  # 反向投影用于去归一化
 
         # ============ Encoder ============#
         layers = []
@@ -122,6 +142,7 @@ class NILMFormer(nn.Module):
         # 2) Project exogenous features
         encoding = self.ProjEmbedding(encoding)  # shape: (B, d_model//4, L)
         # 3) Concatenate
+        # 将负荷特征x和时间特征encoding拼接
         x = torch.cat([x, encoding], dim=1).permute(0, 2, 1)  # (B, L, d_model)
 
         # === Mean/Std tokens === #

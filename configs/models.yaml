@@ -162,6 +162,7 @@ Inception:
     lr: !!float 1e-3
     wd: !!float 0
 
+
 NILMFormer:
   model_kwargs:
     c_out: 1
@@ -172,11 +173,11 @@ NILMFormer:
     conv_bias: true
 
     use_efficient_attention: false
-    n_encoder_layers: 3
-    d_model: 96
+    n_encoder_layers: 3 # 3层编码层
+    d_model: 96 # 隐藏维度96
     dp_rate: 0.2
     pffn_ratio: 4
-    n_head: 8
+    n_head: 8 # 8头注意力
     norm_eps: !!float 1e-5
   model_training_param:
     lr: !!float 1e-4
