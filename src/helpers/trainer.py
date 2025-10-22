@@ -423,6 +423,7 @@ class SeqToSeqTrainer:
             logging.info("Error during loading log checkpoint state dict : no update.")
         return
 
+    # 训练，方向传播
     def __train(self):
         """
         Private function : model training loop over data loader
@@ -440,7 +441,7 @@ class SeqToSeqTrainer:
                 target = torch.Tensor(states.float()).to(self.device)
 
             # ===================forward===================== #
-            self.optimizer.zero_grad()
+            self.optimizer.zero_grad()  # 清空梯度
 
             if self.loss_in_model:
                 pred, loss = self.model(ts_agg, target)
@@ -454,8 +455,8 @@ class SeqToSeqTrainer:
 
             # ===================backward==================== #
             loss_train += loss.item()
-            loss.backward()
-            self.optimizer.step()
+            loss.backward() # 反向传播计算梯度
+            self.optimizer.step()   # 更新模型参数
 
         loss_train = loss_train / len(self.train_loader)
 
@@ -524,6 +525,7 @@ class TserTrainer:
 
         # =======================class variables======================= #
         self.model = model
+        # 在训练器初始化时配置了优化器
         self.optimizer = optim.AdamW(
             self.model.parameters(), lr=learning_rate, weight_decay=weight_decay
         )

@@ -22,7 +22,7 @@ class NILMFormerConfig:
     conv_bias: bool = True
 
     use_efficient_attention: bool = False
-    n_encoder_layers: int = 3
+    n_encoder_layers: int = 3   # 设置编码器层数，它没有解码器
     d_model: int = 96
     dp_rate: float = 0.2
     pffn_ratio: int = 4

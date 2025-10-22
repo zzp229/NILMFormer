@@ -14,7 +14,10 @@ from src.nilmformer.layers.embedding import DilatedBlock
 
 from src.nilmformer.congif import NILMFormerConfig
 
-
+# Input → Instance Norm → Dilated Conv Embedding → Time Feature Projection →
+# Statistical Tokens → Diagonal-Masked Multi-Head Attention → Feed Forward →
+# Conv Head → Reverse Instance Norm → Output
+# 输入序列 → [改进的Input Embedding] → [Transformer Encoder × N] → [卷积输出头] → 输出序列
 class NILMFormer(nn.Module):
     def __init__(self, NFConfig: NILMFormerConfig):
         super().__init__()
@@ -91,25 +94,31 @@ class NILMFormer(nn.Module):
         # ============ Initialize Weights ============#
         self.initialize_weights()
 
+# region 初始化权重
     def initialize_weights(self):
         """Initialize nn.Linear and nn.LayerNorm weights."""
         self.apply(self._init_weights)
 
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
-            torch.nn.init.xavier_uniform_(m.weight)
+            torch.nn.init.xavier_uniform_(m.weight) # 线性层使用Xavier均匀初始化
             if m.bias is not None:
-                nn.init.constant_(m.bias, 0)
+                nn.init.constant_(m.bias, 0) # 偏置初始化为0
         elif isinstance(m, nn.LayerNorm):
-            nn.init.constant_(m.bias, 0)
-            nn.init.constant_(m.weight, 1.0)
+            nn.init.constant_(m.bias, 0) # 层归一化偏置初始化为0
+            nn.init.constant_(m.weight, 1.0) # 层归一化权重初始化为1
 
+# endregion
+
+
+    # 控制训练时参数更新和计算梯度 冻结或解冻模型参数
+    # 迁移学习、分阶段训练或微调特定组件等高级训练策略
     def freeze_params(self, model_part, rq_grad=False):
         """Utility to freeze/unfreeze parameters in a given model part."""
         for _, child in model_part.named_children():
             for param in child.parameters():
-                param.requires_grad = rq_grad
-            self.freeze_params(child)
+                param.requires_grad = rq_grad # 控制梯度计算
+            self.freeze_params(child) # 递归应用到子模块
 
     def forward(self, x) -> torch.Tensor:
         """
@@ -123,8 +132,9 @@ class NILMFormer(nn.Module):
         # Separate the channels:
         #   x[:, :1, :] => load curve
         #   x[:, 1:, :] => exogenous input(s)
-        encoding = x[:, 1:, :]  # shape: (B, e, L)
-        x = x[:, :1, :]  # shape: (B, 1, L)
+        # 分离负荷曲线和时间特征
+        encoding = x[:, 1:, :]  # shape: (B, e, L) # 时间特征
+        x = x[:, :1, :]  # shape: (B, 1, L) # 负荷曲线
 
         # === Instance Normalization === #
         inst_mean = torch.mean(x, dim=-1, keepdim=True).detach()
@@ -135,17 +145,20 @@ class NILMFormer(nn.Module):
         x = (x - inst_mean) / inst_std  # shape still (B, 1, L)
 
         # === Embedding === #
+        # 1) 扩张卷积嵌入负荷特征
         # 1) Dilated Conv block
         x = self.EmbedBlock(
             x
         )  # shape: (B, [d_model_], L) => typically (B, 72, L) if d_model=96
         # 2) Project exogenous features
+        # 2) 投影时间特征
         encoding = self.ProjEmbedding(encoding)  # shape: (B, d_model//4, L)
         # 3) Concatenate
         # 将负荷特征x和时间特征encoding拼接
         x = torch.cat([x, encoding], dim=1).permute(0, 2, 1)  # (B, L, d_model)
 
         # === Mean/Std tokens === #
+        # 添加均值和标准差的特殊令牌
         stats_token = self.ProjStats1(
             torch.cat([inst_mean, inst_std], dim=1).permute(0, 2, 1)
         )  # (B, 1, d_model)

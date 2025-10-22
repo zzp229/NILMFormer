@@ -17,7 +17,6 @@ from typing import Any
 
 from src.nilmformer.congif import NILMFormerConfig
 
-
 class DiagonalMaskFromSeqlen:
     """
     对角线掩码生成器
@@ -121,23 +120,45 @@ class DiagonnalyMaskedSelfAttention(nn.Module):
 
 
 class PositionWiseFeedForward(nn.Module):
+    """
+    Position-wise Feed-Forward Network (FFN)
+    这就是 Transformer Encoder 中的 Feed Forward 层！
+
+    标准 Transformer 结构：
+    1. Multi-Head Attention  ← DiagonnalyMaskedSelfAttention
+    2. Feed Forward Network  ← 就是这个类！
+
+    作用：对每个位置独立地进行非线性变换
+    结构：Linear -> GELU -> Dropout -> Linear
+         (d_model -> hidden_dim -> d_model)
+    """
     def __init__(
         self,
-        dim: int,
-        hidden_dim: int,
+        dim: int,           # 输入/输出维度 (d_model=96)
+        hidden_dim: int,    # 隐藏层维度 (通常是 d_model * 4 = 384)
         dp_rate: float = 0.0,
-        activation: Any = F.gelu,
+        activation: Any = F.gelu,  # 激活函数（GELU）
         bias1: bool = True,
         bias2: bool = True,
     ):
         super().__init__()
-        self.layer1 = nn.Linear(dim, hidden_dim, bias=bias1)
-        self.layer2 = nn.Linear(hidden_dim, dim, bias=bias2)
+        # FFN 的两层全连接网络
+        self.layer1 = nn.Linear(dim, hidden_dim, bias=bias1)      # 升维：96 -> 384
+        self.layer2 = nn.Linear(hidden_dim, dim, bias=bias2)      # 降维：384 -> 96
         self.dropout = nn.Dropout(dp_rate)
-        self.activation = activation
+        self.activation = activation  # GELU 激活函数
 
-    # 前馈网络
     def forward(self, x) -> torch.Tensor:
+        """
+        前馈网络的前��传播
+        x: (B, L, d_model) -> (B, L, d_model)
+
+        在 NILM 中的作用：
+        - 升维到更高维空间 (96 -> 384) 进行特征提取
+        - 学习复杂的非线性功率变化模式
+        - 区分不同电器的功率特征（微波炉 vs 电水壶）
+        """
+        # x -> Linear1 -> GELU -> Dropout -> Linear2
         x = self.layer2(self.dropout(self.activation(self.layer1(x))))
         return x
 
@@ -158,11 +179,13 @@ class EncoderLayer(nn.Module):
             use_efficient_attention=NFconfig.use_efficient_attention,
         )
 
+        # 层归一化
         self.norm1 = nn.LayerNorm(NFconfig.d_model, eps=NFconfig.norm_eps)
         self.norm2 = nn.LayerNorm(NFconfig.d_model, eps=NFconfig.norm_eps)
 
         self.dropout = nn.Dropout(NFconfig.dp_rate)
 
+        # 前馈网络
         self.pffn = PositionWiseFeedForward(
             dim=NFconfig.d_model,
             hidden_dim=NFconfig.d_model * NFconfig.pffn_ratio,
